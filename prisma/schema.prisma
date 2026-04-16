@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String   @unique
+  pin             String
+  role            String   @default("CLIENT") // CLIENT or ADMIN
+  visitsCount     Int      @default(0)
+  completedCycles Int      @default(0)
+  referralCount   Int      @default(0) // Lifetime referrals
+  referralBonuses Int      @default(0) // Spendable balance
+  lastVisitAt     DateTime @default(now())
+  referralCode    String   @unique
+  referredByCode  String?
+  videoStage      Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model VisitReward {
+  id          String   @id @default(cuid())
+  visitNumber Int      @unique // 1 to 10
+  rewardText  String   // e.g. "-10%" or "Free Coffee"
+  updatedAt   DateTime @updatedAt
+}
+
+model GlobalSettings {
+  id             String   @id @default("SIRIUS_CONFIG")
+  referralReward String   @default("Безкоштовна стрижка") // Reward for both
+  updatedAt      DateTime @updatedAt
+}

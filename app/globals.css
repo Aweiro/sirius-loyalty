@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sirius-bg: #050508;
+  --color-sirius-card: #0a0a0f;
+  --color-sirius-accent: #0047ff;
+  --color-sirius-filled: #ff3b30;
+  --color-sirius-text: #ffffff;
+  --color-sirius-secondary: #8a8a9a;
+  --color-sirius-border: #1e1e2e;
+
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-dot: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-dot-filled: 0 0 30px rgba(255, 59, 48, 0.3);
+  --shadow-modal: 0 30px 60px rgba(0, 0, 0, 0.5);
+
+  --font-size-loyalty: clamp(1.2rem, 8vw, 4.5rem);
+
+  --animate-ring-swing: ringSwing 15s infinite alternate ease-in-out;
+  --animate-float-particle: floatParticle 15s infinite linear;
+  --animate-dot-pulse: dotPulse 2s infinite ease-in-out;
+  --animate-aurora-move: auroraMove 20s infinite alternate ease-in-out;
+  --animate-text-shine: shine 5s linear infinite;
+
+  @keyframes ringSwing {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg) scale(0.98);
+    }
+
+    100% {
+      transform: translate(-50%, -50%) rotate(15deg) scale(1.02);
+    }
+  }
+
+  @keyframes floatParticle {
+    0% {
+      transform: translateY(110vh) translateX(0);
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 0.2;
+    }
+
+    90% {
+      opacity: 0.2;
+    }
+
+    100% {
+      transform: translateY(-10vh) translateX(100px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes dotPulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 30px rgba(0, 71, 255, 0.5);
+    }
+
+    50% {
+      transform: scale(1.15);
+      box-shadow: 0 0 60px rgba(0, 71, 255, 0.8);
+    }
+
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 30px rgba(0, 71, 255, 0.5);
+    }
+  }
+
+  @keyframes auroraMove {
+    0% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+
+    50% {
+      transform: translate(5vw, 10vh) scale(1.1) rotate(5deg);
+    }
+
+    100% {
+      transform: translate(-5vw, -5vh) rotate(-5deg) scale(1);
+    }
+  }
+
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+}
+
+@layer base {
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background-color: var(--color-sirius-bg);
+    color: var(--color-sirius-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Autofill Overrides */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0a0a0f inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  .glass {
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .loyalty-title-main {
+    @apply font-extrabold tracking-tight m-0 leading-none uppercase text-left animate-text-shine;
+    font-size: var(--font-size-loyalty);
+    background: linear-gradient(to bottom, #fff, #888);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+  }
+
+}
