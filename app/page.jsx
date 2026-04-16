@@ -45,7 +45,7 @@ export default function Home() {
     const isAdmin = currentUser?.role === 'ADMIN';
 
     return (
-        <div className="min-h-screen w-full flex flex-col bg-sirius-bg text-white font-sans selection:bg-sirius-accent selection:text-white">
+        <div className="relative min-h-screen w-full bg-sirius-bg text-white font-sans selection:bg-sirius-accent selection:text-white">
             {/* Admin Header - Sticky Top */}
             {isAdmin && (
                 <header className="sticky top-0 left-0 right-0 z-[1000] bg-sirius-bg/60 backdrop-blur-xl border-b border-white/5 px-6 py-3">

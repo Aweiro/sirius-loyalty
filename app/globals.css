@@ -99,7 +99,8 @@
     height: auto;
     min-height: 100vh;
     overflow-x: hidden;
-    overflow-y: visible;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background-color: var(--color-sirius-bg);
     color: var(--color-sirius-text);
     -webkit-font-smoothing: antialiased;
