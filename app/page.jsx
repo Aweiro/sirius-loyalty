@@ -46,38 +46,51 @@ export default function Home() {
 
     return (
         <div className="min-h-screen w-full flex flex-col bg-sirius-bg text-white font-sans selection:bg-sirius-accent selection:text-white overflow-x-hidden">
-            {/* View Switcher & Auth - Floating Island Bottom Right */}
+            {/* Admin Header - Sticky Top */}
             {isAdmin && (
-                <div className="fixed bottom-4 sm:bottom-8 right-4 sm:right-8 flex items-center gap-1 p-1.5 rounded-2xl z-[1000] bg-sirius-card/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden ring-1 ring-white/5">
-                    <button
-                        onClick={() => setActiveTab('client')}
-                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[0.7rem] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'client' ? 'bg-sirius-accent text-white shadow-lg shadow-sirius-accent/20' : 'text-sirius-secondary hover:text-white'
-                            }`}
-                    >
-                        <UserIcon size={14} />
-                        Клієнт
-                    </button>
+                <header className="sticky top-0 left-0 right-0 z-[1000] bg-sirius-bg/60 backdrop-blur-xl border-b border-white/5 px-6 py-3">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-sirius-accent flex items-center justify-center shadow-lg shadow-sirius-accent/20">
+                                <ShieldIcon size={16} className="text-white" />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-[0.3em] text-white">Sirius Admin</span>
+                        </div>
 
-                    <button
-                        onClick={() => setActiveTab('admin')}
-                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[0.7rem] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'admin' ? 'bg-sirius-accent text-white shadow-lg shadow-sirius-accent/20' : 'text-sirius-secondary hover:text-white'
-                            }`}
-                    >
-                        <ShieldIcon size={14} />
-                        Адмін
-                    </button>
+                        <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
+                            <button
+                                onClick={() => setActiveTab('client')}
+                                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-[0.65rem] sm:text-[0.7rem] font-black uppercase tracking-widest transition-all ${activeTab === 'client' ? 'bg-sirius-accent text-white' : 'text-sirius-secondary hover:text-white'
+                                    }`}
+                            >
+                                <UserIcon size={14} />
+                                <span className="hidden sm:inline">Вигляд клієнта</span>
+                                <span className="sm:hidden">Клієнт</span>
+                            </button>
 
-                    <button
-                        onClick={logout}
-                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-sirius-secondary hover:text-red-400 transition-all duration-300 ml-1"
-                        title="Вийти"
-                    >
-                        <LogoutIcon size={16} />
-                    </button>
-                </div>
+                            <button
+                                onClick={() => setActiveTab('admin')}
+                                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-[0.65rem] sm:text-[0.7rem] font-black uppercase tracking-widest transition-all ${activeTab === 'admin' ? 'bg-sirius-accent text-white' : 'text-sirius-secondary hover:text-white'
+                                    }`}
+                            >
+                                <ShieldIcon size={14} />
+                                <span className="hidden sm:inline">Дашборд</span>
+                                <span className="sm:hidden">Адмін</span>
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={logout}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sirius-secondary hover:text-red-400 transition-all"
+                            title="Вийти"
+                        >
+                            <LogoutIcon size={18} />
+                        </button>
+                    </div>
+                </header>
             )}
 
-            {/* Login link for public visitors who are not logged in yet */}
+            {/* Login link for public visitors */}
             {!currentUser && (
                 <div className="fixed top-5 right-5 z-[1000]">
                     <Link

@@ -97,7 +97,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
         </button>
       </div>
 
-      <div className="bg-sirius-card border border-white/5 rounded-[24px] sm:rounded-[40px] flex-1 flex flex-col overflow-hidden shadow-2xl relative text-white">
+      <div className="bg-sirius-card border border-white/5 rounded-[24px] sm:rounded-[40px] flex flex-col shadow-2xl relative text-white">
         {activeSubTab === 'users' ? (
           <>
             <div className="p-4 sm:p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -120,7 +120,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto custom-scrollbar">
+            <div className="w-full overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="text-sirius-secondary text-[0.7rem] sm:text-sm uppercase tracking-wider bg-white/[0.02]">
