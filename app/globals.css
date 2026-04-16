@@ -96,8 +96,9 @@
   body {
     margin: 0;
     padding: 0;
-    min-height: 100%;
-    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
     background-color: var(--color-sirius-bg);
     color: var(--color-sirius-text);
     -webkit-font-smoothing: antialiased;

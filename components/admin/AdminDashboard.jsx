@@ -120,7 +120,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
               </button>
             </div>
 
-            <div className="w-full overflow-x-auto custom-scrollbar">
+            <div className="w-full">
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="text-sirius-secondary text-[0.7rem] sm:text-sm uppercase tracking-wider bg-white/[0.02]">
@@ -211,7 +211,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
             </div>
           </>
         ) : (
-          <div className="p-6 sm:p-10 overflow-auto custom-scrollbar">
+          <div className="p-6 sm:p-10">
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-between mb-8">
                 <div>

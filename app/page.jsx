@@ -103,7 +103,7 @@ export default function Home() {
                 </div>
             )}
 
-            <main className="flex-1 w-full">
+            <main className="w-full">
                 {activeTab === 'client' || !isAdmin ? (
                     currentUser ? (
                         <ClientView
