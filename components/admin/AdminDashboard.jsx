@@ -67,7 +67,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
   };
 
   return (
-    <div className="h-full flex flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full gap-6">
+    <div className="flex flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full gap-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
