@@ -34,16 +34,16 @@ const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebrati
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col bg-sirius-bg text-white overflow-x-hidden">
+    <div className="relative w-full flex flex-col bg-sirius-bg text-white overflow-x-hidden">
       {/* Background Texture & Effects */}
       <div
         className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-[2] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 bg-[radial-gradient(circle,_rgba(0,71,255,0.06)_0%,_transparent_70%)]"
         style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px`, opacity: mousePos.x === 0 ? 0 : 1 }}
       />
 
-      <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[100px] z-[1] opacity-30 pointer-events-none">
-        <div className="absolute rounded-full bg-sirius-accent blur-[80px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-40"></div>
-        <div className="absolute rounded-full bg-[#0033cc] blur-[80px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-30 delay-[-5s]"></div>
+      <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[60px] z-[1] opacity-30 pointer-events-none">
+        <div className="absolute rounded-full bg-sirius-accent blur-[40px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-40"></div>
+        <div className="absolute rounded-full bg-[#0033cc] blur-[40px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-30 delay-[-5s]"></div>
       </div>
 
       <div className="absolute inset-0 z-[3] pointer-events-none">

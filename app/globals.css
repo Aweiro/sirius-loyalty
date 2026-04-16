@@ -98,6 +98,7 @@
     padding: 0;
     height: auto;
     min-height: 100vh;
+    overflow-x: hidden;
     overflow-y: visible;
     background-color: var(--color-sirius-bg);
     color: var(--color-sirius-text);
