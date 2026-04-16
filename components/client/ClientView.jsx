@@ -34,62 +34,65 @@ const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebrati
   }, []);
 
   return (
-    <div className="relative w-full flex flex-col bg-sirius-bg text-white overflow-x-hidden">
-      {/* Background Texture & Effects */}
-      <div
-        className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-[2] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 bg-[radial-gradient(circle,_rgba(0,71,255,0.06)_0%,_transparent_70%)]"
-        style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px`, opacity: mousePos.x === 0 ? 0 : 1 }}
-      />
+    <div className="relative w-full flex flex-col bg-sirius-bg text-white">
+      {/* Background Layer: Contains everything that shouldn't affect layout/scroll */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Background Texture & Effects */}
+        <div
+          className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-[2] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 bg-[radial-gradient(circle,_rgba(0,71,255,0.06)_0%,_transparent_70%)]"
+          style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px`, opacity: mousePos.x === 0 ? 0 : 1 }}
+        />
 
-      <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[60px] z-[1] opacity-30 pointer-events-none">
-        <div className="absolute rounded-full bg-sirius-accent blur-[40px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-40"></div>
-        <div className="absolute rounded-full bg-[#0033cc] blur-[40px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-30 delay-[-5s]"></div>
-      </div>
+        <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[60px] z-[1] opacity-30 pointer-events-none">
+          <div className="absolute rounded-full bg-sirius-accent blur-[40px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-40"></div>
+          <div className="absolute rounded-full bg-[#0033cc] blur-[40px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-30 delay-[-5s]"></div>
+        </div>
 
-      <div className="absolute inset-0 z-[3] pointer-events-none">
-        {particles.map(p => (
-          <div
-            key={p.id}
-            className="absolute bg-white rounded-full opacity-10 animate-float-particle"
-            style={{
-              left: p.left,
-              animationDelay: p.delay,
-              animationDuration: p.duration,
-              width: p.size,
-              height: p.size
-            }}
-          />
-        ))}
-      </div>
+        <div className="absolute inset-0 z-[3] pointer-events-none">
+          {particles.map(p => (
+            <div
+              key={p.id}
+              className="absolute bg-white rounded-full opacity-10 animate-float-particle"
+              style={{
+                left: p.left,
+                animationDelay: p.delay,
+                animationDuration: p.duration,
+                width: p.size,
+                height: p.size
+              }}
+            />
+          ))}
+        </div>
 
-      <div className="absolute top-1/2 right-[-15vh] -translate-y-1/2 w-[120vh] h-[120vh] z-[1] pointer-events-none">
-        {[1, 0.85, 0.7, 0.55, 0.4].map((scale, i) => (
-          <div
-            key={i}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sirius-accent/10 animate-ring-swing"
-            style={{
-              width: `${scale * 100}%`,
-              height: `${scale * 100}%`,
-              animationDuration: `${20 + i * 2}s`
-            }}
-          />
-        ))}
-      </div>
+        <div className="absolute top-1/2 right-[-15vh] -translate-y-1/2 w-[120vh] h-[120vh] z-[1] pointer-events-none">
+          {[1, 0.85, 0.7, 0.55, 0.4].map((scale, i) => (
+            <div
+              key={i}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sirius-accent/10 animate-ring-swing"
+              style={{
+                width: `${scale * 100}%`,
+                height: `${scale * 100}%`,
+                animationDuration: `${20 + i * 2}s`
+              }}
+            />
+          ))}
+        </div>
 
-      <div className="absolute inset-0 z-[1]">
-        <AnimatePresence mode="wait">
-          <motion.video
-            key={videoUrl}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.15 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
-            autoPlay muted loop playsInline
-            className="w-full h-full object-cover"
-            src={videoUrl}
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_80%_50%,rgba(0,71,255,0.15)_0%,transparent_60%)]"></div>
+        <div className="absolute inset-0 z-[1]">
+          <AnimatePresence mode="wait">
+            <motion.video
+              key={videoUrl}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }}
+              autoPlay muted loop playsInline
+              className="w-full h-full object-cover"
+              src={videoUrl}
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_80%_50%,rgba(0,71,255,0.15)_0%,transparent_60%)]"></div>
+        </div>
       </div>
 
       <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-24">
