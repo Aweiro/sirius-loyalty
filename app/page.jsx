@@ -45,36 +45,34 @@ export default function Home() {
     const isAdmin = currentUser?.role === 'ADMIN';
 
     return (
-        <div className="h-screen w-screen flex flex-col overflow-hidden bg-sirius-bg text-white font-sans selection:bg-sirius-accent selection:text-white">
-            {/* View Switcher & Auth - Only for Admin */}
+        <div className="min-h-screen w-full flex flex-col bg-sirius-bg text-white font-sans selection:bg-sirius-accent selection:text-white overflow-x-hidden">
+            {/* View Switcher & Auth - Floating Island Bottom Right */}
             {isAdmin && (
-                <div className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-5 sm:translate-x-0 flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl z-[1000] bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl">
+                <div className="fixed bottom-4 sm:bottom-8 right-4 sm:right-8 flex items-center gap-1 p-1.5 rounded-2xl z-[1000] bg-sirius-card/80 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden ring-1 ring-white/5">
                     <button
                         onClick={() => setActiveTab('client')}
-                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-[0.75rem] sm:text-sm font-medium transition-all duration-300 ${activeTab === 'client' ? 'bg-sirius-accent text-white opacity-100' : 'opacity-60 hover:opacity-100'
+                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[0.7rem] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'client' ? 'bg-sirius-accent text-white shadow-lg shadow-sirius-accent/20' : 'text-sirius-secondary hover:text-white'
                             }`}
                     >
-                        <UserIcon size={16} />
+                        <UserIcon size={14} />
                         Клієнт
                     </button>
 
                     <button
                         onClick={() => setActiveTab('admin')}
-                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-[0.75rem] sm:text-sm font-medium transition-all duration-300 ${activeTab === 'admin' ? 'bg-sirius-accent text-white opacity-100' : 'opacity-60 hover:opacity-100'
+                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[0.7rem] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'admin' ? 'bg-sirius-accent text-white shadow-lg shadow-sirius-accent/20' : 'text-sirius-secondary hover:text-white'
                             }`}
                     >
-                        <ShieldIcon size={16} />
+                        <ShieldIcon size={14} />
                         Адмін
                     </button>
 
-                    <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block" />
-
                     <button
                         onClick={logout}
-                        className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-[0.75rem] sm:text-sm font-medium opacity-60 hover:opacity-100 hover:text-red-400 transition-all duration-300"
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-sirius-secondary hover:text-red-400 transition-all duration-300 ml-1"
+                        title="Вийти"
                     >
                         <LogoutIcon size={16} />
-                        <span className="hidden sm:inline">Вийти</span>
                     </button>
                 </div>
             )}
@@ -92,7 +90,7 @@ export default function Home() {
                 </div>
             )}
 
-            <main className="flex-1 h-full overflow-hidden">
+            <main className="flex-1 w-full">
                 {activeTab === 'client' || !isAdmin ? (
                     currentUser ? (
                         <ClientView

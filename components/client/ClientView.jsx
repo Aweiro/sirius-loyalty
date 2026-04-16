@@ -34,7 +34,7 @@ const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebrati
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col overflow-hidden bg-sirius-bg text-white">
+    <div className="relative w-full min-h-screen flex flex-col bg-sirius-bg text-white overflow-x-hidden">
       {/* Background Texture & Effects */}
       <div
         className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-[2] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 bg-[radial-gradient(circle,_rgba(0,71,255,0.06)_0%,_transparent_70%)]"
@@ -92,7 +92,7 @@ const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebrati
         <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_80%_50%,rgba(0,71,255,0.15)_0%,transparent_60%)]"></div>
       </div>
 
-      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 py-[2vh] flex-1 overflow-y-auto custom-scrollbar">
+      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 py-[4vh]">
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
           {/* Left Column: Heading + Card */}
           <div className="flex-1 w-full flex flex-col gap-[4vh] sm:gap-[6vh]">
