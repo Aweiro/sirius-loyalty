@@ -51,11 +51,11 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col p-6 overflow-x-hidden relative">
+        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center justify-center p-6 overflow-x-hidden relative">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/5 to-transparent pointer-events-none"></div>
 
-            <div className="max-w-[380px] w-full mx-auto relative z-10 flex flex-col flex-1">
-                <header className="pt-4 mb-10 flex items-center">
+            <div className="max-w-[380px] w-full relative z-10 py-10">
+                <header className="mb-8 p-0 flex items-center">
                     <Link href="/" className="p-2 -ml-2 text-sirius-secondary hover:text-white transition-all">
                         <ArrowLeft size={22} />
                     </Link>
@@ -64,7 +64,7 @@ export default function Login() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-10"
+                    className="mb-10 text-center sm:text-left"
                 >
                     <h1 className="text-3xl font-[900] uppercase tracking-tight leading-none mb-2">З Поверненням</h1>
                     <p className="text-sirius-secondary text-[0.65rem] uppercase font-bold tracking-[0.2em] opacity-60">Доступ до вашої картки</p>
@@ -127,11 +127,11 @@ export default function Login() {
                         </p>
                     </div>
                 </motion.form>
-
-                <footer className="mt-auto pb-6 text-center">
-                    <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop</p>
-                </footer>
             </div>
+
+            <footer className="absolute bottom-0 left-0 right-0 pb-10 text-center z-10">
+                <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop</p>
+            </footer>
         </div>
     );
 }

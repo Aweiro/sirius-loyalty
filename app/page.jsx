@@ -115,7 +115,7 @@ export default function Home() {
                             logout={logout}
                         />
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center p-6 text-center gap-6 relative overflow-hidden bg-sirius-bg">
+                        <div className="min-h-[85vh] flex flex-col items-center justify-center p-6 text-center gap-6 relative overflow-hidden bg-sirius-bg">
                             <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[100px] z-[1] opacity-30 pointer-events-none">
                                 <div className="absolute rounded-full bg-sirius-accent blur-[80px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-20"></div>
                                 <div className="absolute rounded-full bg-[#0033cc] blur-[80px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-15 delay-[-5s]"></div>

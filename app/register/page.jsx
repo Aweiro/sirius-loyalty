@@ -52,16 +52,15 @@ export default function Register() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col p-5 overflow-x-hidden relative">
+        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center justify-center p-5 overflow-x-hidden relative">
             {/* Minimal Background Effects */}
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/10 to-transparent pointer-events-none opacity-50"></div>
 
-            <div className="max-w-[400px] w-full mx-auto relative z-10 flex flex-col flex-1">
-                <header className="pt-4 mb-8 flex justify-between items-center">
+            <div className="max-w-[400px] w-full relative z-10 py-10">
+                <header className="mb-8 p-0 flex justify-between items-center">
                     <Link href="/" className="p-2 -ml-2 text-sirius-secondary hover:text-white transition-all">
                         <ArrowLeft size={20} />
                     </Link>
-                    <img src="/logo-small.png" alt="Sirius" className="h-6 opacity-40 grayscale contrast-200 hidden" />
                     <div className="text-[0.6rem] font-bold tracking-[0.3em] text-sirius-accent uppercase border border-sirius-accent/30 px-3 py-1 rounded-full bg-sirius-accent/5">
                         Loyalty Card
                     </div>
@@ -161,11 +160,11 @@ export default function Register() {
                         </p>
                     </div>
                 </motion.form>
-
-                <footer className="mt-auto pb-6 text-center">
-                    <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop 2026</p>
-                </footer>
             </div>
+
+            <footer className="absolute bottom-0 left-0 right-0 pb-10 text-center z-10">
+                <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop 2026</p>
+            </footer>
         </div>
     );
 }
