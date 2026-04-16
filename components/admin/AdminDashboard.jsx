@@ -120,7 +120,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
               </button>
             </div>
 
-            <div className="w-full">
+            <div className="w-full overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="text-sirius-secondary text-[0.7rem] sm:text-sm uppercase tracking-wider bg-white/[0.02]">
