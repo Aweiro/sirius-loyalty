@@ -19,6 +19,10 @@ export default function Login() {
     const pinRef = React.useRef(null);
     const phoneRef = React.useRef(null);
 
+    React.useEffect(() => {
+        phoneRef.current?.focus();
+    }, []);
+
     const formatPhone = (value) => {
         const digits = value.replace(/\D/g, '');
         const clean = digits.startsWith('48') ? digits.slice(2, 11) : digits.slice(0, 9);
@@ -101,7 +105,7 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center p-6 overflow-x-hidden relative pt-[8vh] sm:justify-center">
+        <div className="h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-6 overflow-hidden relative pt-[4vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/5 to-transparent pointer-events-none"></div>
 
             <div className="max-w-[380px] w-full relative z-10 py-10">
@@ -192,7 +196,7 @@ export default function Login() {
                 </motion.form>
             </div>
 
-            <footer className="absolute bottom-0 left-0 right-0 pb-10 text-center z-10">
+            <footer className="absolute bottom-6 sm:bottom-10 left-0 right-0 text-center z-10">
                 <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop</p>
             </footer>
         </div>

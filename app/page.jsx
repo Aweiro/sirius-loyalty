@@ -120,7 +120,7 @@ export default function Home() {
                             logout={() => setShowLogoutConfirm(true)}
                         />
                     ) : (
-                        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center gap-6 relative overflow-hidden bg-[#05070a]">
+                        <div className="h-[100dvh] flex flex-col items-center justify-center p-6 text-center gap-4 sm:gap-6 relative overflow-hidden bg-[#05070a]">
                             {/* Aurora Background */}
                             <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[100px] z-[1] opacity-30 pointer-events-none">
                                 <div className="absolute rounded-full bg-sirius-accent blur-[80px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-20"></div>
@@ -191,7 +191,7 @@ export default function Home() {
                                 </div>
                             </motion.div>
 
-                            <div className="absolute bottom-10 z-10 opacity-20 text-[0.6rem] uppercase tracking-[0.5em] font-bold text-sirius-secondary">
+                            <div className="absolute bottom-6 sm:bottom-10 z-10 opacity-20 text-[0.6rem] uppercase tracking-[0.5em] font-bold text-sirius-secondary">
                                 Sirius Barbershop 2026
                             </div>
                         </div>

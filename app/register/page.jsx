@@ -22,10 +22,13 @@ function RegisterContent() {
     
     const pinRef = useRef(null);
     const phoneRef = useRef(null);
+    const nameRef = useRef(null);
 
     React.useEffect(() => {
         const ref = searchParams.get('ref');
         if (ref) setReferralCode(ref.toUpperCase());
+        
+        nameRef.current?.focus();
     }, [searchParams]);
 
     const formatPhone = (value) => {
@@ -102,7 +105,7 @@ function RegisterContent() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center p-5 overflow-x-hidden relative pt-[6vh] sm:justify-center">
+        <div className="h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-5 overflow-hidden relative pt-[2vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/10 to-transparent pointer-events-none opacity-50"></div>
 
             <div className="max-w-[400px] w-full relative z-10 py-10">
@@ -140,6 +143,7 @@ function RegisterContent() {
                                 required
                                 name="name"
                                 type="text"
+                                ref={nameRef}
                                 placeholder={t.nameLabel}
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20"
                             />
@@ -218,7 +222,7 @@ function RegisterContent() {
                 </motion.form>
             </div>
 
-            <footer className="absolute bottom-0 left-0 right-0 pb-10 text-center z-10">
+            <footer className="absolute bottom-6 sm:bottom-10 left-0 right-0 text-center z-10">
                 <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop 2026</p>
             </footer>
         </div>
