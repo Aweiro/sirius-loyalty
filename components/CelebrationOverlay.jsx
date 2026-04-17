@@ -2,8 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Award, Share2, Sparkles } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const CelebrationOverlay = ({ isVisible, onClose }) => {
+  const { t } = useLanguage();
   const celebrationTriggered = useRef(false);
 
   useEffect(() => {
@@ -69,14 +71,14 @@ const CelebrationOverlay = ({ isVisible, onClose }) => {
               <Award size={40} />
             </motion.div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-white">
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-4xl lg:text-[3.5rem] font-black tracking-tight leading-tight"
               >
-                ВІТАЄМО!
+                {t.successRegTitle.toUpperCase()}
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -84,7 +86,7 @@ const CelebrationOverlay = ({ isVisible, onClose }) => {
                 transition={{ delay: 0.4 }}
                 className="text-sirius-secondary text-lg"
               >
-                Ви отримали свій супер-бонус
+                {t.celebrationSub}
               </motion.p>
             </div>
 
@@ -104,7 +106,7 @@ const CelebrationOverlay = ({ isVisible, onClose }) => {
                 onClick={onClose}
                 className="w-full bg-sirius-accent text-white py-5 rounded-2xl font-black text-xl shadow-xl shadow-sirius-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
-                ЗАБРАТИ БОНУС
+                {t.celebrationBtn}
               </button>
 
               <button className="flex items-center justify-center gap-2 text-sirius-secondary font-bold py-2 hover:text-white transition-colors">

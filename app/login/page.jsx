@@ -6,8 +6,11 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Phone, ShieldCheck, LogIn, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Login() {
+    const { t, lang } = useLanguage();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -20,7 +23,7 @@ export default function Login() {
         const digits = value.replace(/\D/g, '');
         const clean = digits.startsWith('48') ? digits.slice(2, 11) : digits.slice(0, 9);
         
-        if (clean.length === 0) return '';
+        if (clean.length === 0) return { formatted: '', digits: '' };
         
         let formatted = '+48 (' + clean.slice(0, 3);
         if (clean.length > 3) {
@@ -63,7 +66,14 @@ export default function Login() {
                 router.push('/');
             }, 1200);
         } else {
-            setError(result.error);
+            // Translate standard backend errors
+            if (result.error === "Невірний номер телефону або ПІН-код") {
+                setError(t.authError);
+            } else if (result.error === "Невірний номер телефону") {
+                setError(t.errorInvalidPhone);
+            } else {
+                setError(result.error);
+            }
         }
         setIsLoading(false);
     };
@@ -79,8 +89,12 @@ export default function Login() {
                     <div className="w-16 h-16 bg-sirius-accent/20 rounded-full flex items-center justify-center mx-auto mb-5">
                         <CheckCircle2 className="text-sirius-accent" size={32} />
                     </div>
-                    <h2 className="text-2xl font-black uppercase mb-2 text-white">Вітаємо!</h2>
-                    <p className="text-sirius-secondary text-sm">Входимо у ваш профіль...</p>
+                    <h2 className="text-2xl font-black uppercase mb-2 text-white">{t.successRegTitle}</h2>
+                    <div className="flex justify-center gap-2">
+                        <div className="w-2 h-2 bg-sirius-accent rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-sirius-accent rounded-full animate-bounce delay-75"></div>
+                        <div className="w-2 h-2 bg-sirius-accent rounded-full animate-bounce delay-150"></div>
+                    </div>
                 </motion.div>
             </div>
         );
@@ -91,10 +105,11 @@ export default function Login() {
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/5 to-transparent pointer-events-none"></div>
 
             <div className="max-w-[380px] w-full relative z-10 py-10">
-                <header className="mb-8 p-0 flex items-center">
+                <header className="mb-8 p-0 flex items-center justify-between">
                     <Link href="/" className="p-2 -ml-2 text-sirius-secondary hover:text-white transition-all">
                         <ArrowLeft size={22} />
                     </Link>
+                    <LanguageSwitcher />
                 </header>
 
                 <motion.div
@@ -102,8 +117,12 @@ export default function Login() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-10 text-center sm:text-left"
                 >
-                    <h1 className="text-3xl font-[900] uppercase tracking-tight leading-none mb-2">З Поверненням</h1>
-                    <p className="text-sirius-secondary text-[0.65rem] uppercase font-bold tracking-[0.2em] opacity-60">Доступ до вашої картки</p>
+                    <h1 className="text-3xl font-[900] uppercase tracking-tight leading-none mb-2">
+                        {lang === 'ua' ? 'З Поверненням' : 'Witaj Ponownie'}
+                    </h1>
+                    <p className="text-sirius-secondary text-[0.65rem] uppercase font-bold tracking-[0.2em] opacity-60">
+                        {lang === 'ua' ? 'Доступ до вашої картки' : 'Dostęp do Twojej karty'}
+                    </p>
                 </motion.div>
 
                 <motion.form
@@ -141,7 +160,7 @@ export default function Login() {
                                 inputMode="numeric"
                                 pattern="[0-9]{4}"
                                 maxLength={4}
-                                placeholder="Ваш ПІН-код"
+                                placeholder={t.pinLabel}
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20 tracking-[0.3em]"
                             />
                         </div>
@@ -159,12 +178,15 @@ export default function Login() {
                         className="w-full bg-sirius-accent text-white py-4.5 rounded-[24px] font-black text-sm uppercase tracking-widest shadow-xl shadow-sirius-accent/20 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                     >
                         <LogIn size={20} />
-                        {isLoading ? 'Перевірка...' : 'Увійти'}
+                        {isLoading ? (lang === 'ua' ? 'Зачекайте...' : 'Czekaj...') : t.submitLogin}
                     </button>
 
                     <div className="text-center pt-2">
                         <p className="text-sirius-secondary text-[0.7rem] font-bold uppercase tracking-wider opacity-60 italic">
-                            Вперше у нас? <Link href="/register" className="text-sirius-accent hover:underline ml-1">Зареєструватися</Link>
+                            {lang === 'ua' ? 'Вперше у нас?' : 'Pierwszy raz u nas?'} 
+                            <Link href="/register" className="text-sirius-accent hover:underline ml-1">
+                                {lang === 'ua' ? 'Зареєструватися' : 'Zarejestruj się'}
+                            </Link>
                         </p>
                     </div>
                 </motion.form>

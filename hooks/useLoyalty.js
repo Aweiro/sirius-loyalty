@@ -83,11 +83,12 @@ export const useLoyalty = () => {
         return null;
     };
 
-    const registerUser = async (name, phone, pin, referredByCode = null, isAdminRegistration = false) => {
+    const registerUser = async (name, phone, pin, referredByCode = null, isAdminRegistration = false, language = "ua") => {
         const formData = new FormData();
         formData.append('name', name);
         formData.append('phone', phone);
         formData.append('pin', pin);
+        formData.append('language', language);
         if (referredByCode) formData.append('referredByCode', referredByCode);
         if (isAdminRegistration) formData.append('skipSession', 'true');
 

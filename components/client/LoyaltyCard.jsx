@@ -1,7 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
+import { translateReward } from '@/lib/translations';
 
 const LoyaltyCard = ({ progress, rewards }) => {
+  const { lang } = useLanguage();
+  
   return (
     <div className="grid grid-cols-5 gap-[clamp(8px,2vw,45px)] w-full max-w-[950px] overflow-visible">
       {rewards.map((reward, index) => {
@@ -22,7 +26,7 @@ const LoyaltyCard = ({ progress, rewards }) => {
           >
             {!isFilled && reward && (
               <span className="text-[clamp(10px,2vw,22px)] font-black text-white/90 drop-shadow-md">
-                {reward}
+                {translateReward(reward, lang)}
               </span>
             )}
             {!reward && !isFilled && (

@@ -7,8 +7,11 @@ import AdminDashboard from '@/components/admin/AdminDashboard';
 import { User as UserIcon, ShieldCheck as ShieldIcon, LogIn as LoginIcon, LogOut as LogoutIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Home() {
+    const { t, changeLang, lang } = useLanguage();
     const [activeTab, setActiveTab] = useState('client');
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const {
@@ -30,12 +33,18 @@ export default function Home() {
         setAdminPassword
     } = useLoyalty();
 
-    // If user is client, always force client tab
     useEffect(() => {
         if (currentUser && currentUser.role !== 'ADMIN' && activeTab === 'admin') {
             setActiveTab('client');
         }
     }, [currentUser, activeTab]);
+
+    // Only sync language from profile ONCE when user loads
+    useEffect(() => {
+        if (currentUser?.language) {
+            changeLang(currentUser.language);
+        }
+    }, [currentUser?.id]); // Only run when user changes (login/load)
 
     if (loading) return (
         <div className="min-h-screen bg-sirius-bg flex items-center justify-center text-white font-sans">
@@ -83,29 +92,21 @@ export default function Home() {
                             </button>
                         </div>
 
-                        {/* Logout Button */}
-                        <button
-                            onClick={() => setShowLogoutConfirm(true)}
-                            className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sirius-secondary hover:text-red-400 hover:bg-white/5 transition-all shrink-0"
-                            title="Вийти"
-                        >
-                            <LogoutIcon size={18} />
-                        </button>
+                        {/* Language & Logout */}
+                        <div className="flex items-center gap-3">
+                            <div className="hidden sm:block">
+                                <LanguageSwitcher />
+                            </div>
+                            <button
+                                onClick={() => setShowLogoutConfirm(true)}
+                                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sirius-secondary hover:text-red-400 hover:bg-white/5 transition-all shrink-0"
+                                title={t.logout}
+                            >
+                                <LogoutIcon size={18} />
+                            </button>
+                        </div>
                     </div>
                 </header>
-            )}
-
-            {/* Login link for public visitors */}
-            {!currentUser && (
-                <div className="fixed top-5 right-5 z-[1000]">
-                    <Link
-                        href="/login"
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 text-sm font-bold opacity-60 hover:opacity-100 hover:text-sirius-accent transition-all animate-fade-in"
-                    >
-                        <LoginIcon size={16} />
-                        Увійти
-                    </Link>
-                </div>
             )}
 
             <main className="w-full">
@@ -119,31 +120,80 @@ export default function Home() {
                             logout={() => setShowLogoutConfirm(true)}
                         />
                     ) : (
-                        <div className="min-h-[85vh] flex flex-col items-center justify-center p-6 text-center gap-6 relative overflow-hidden bg-sirius-bg">
+                        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center gap-6 relative overflow-hidden bg-[#05070a]">
+                            {/* Aurora Background */}
                             <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[140%] blur-[100px] z-[1] opacity-30 pointer-events-none">
                                 <div className="absolute rounded-full bg-sirius-accent blur-[80px] mix-blend-screen animate-aurora-move w-[50%] h-[50%] top-[10%] left-[30%] opacity-20"></div>
                                 <div className="absolute rounded-full bg-[#0033cc] blur-[80px] mix-blend-screen animate-aurora-move w-[60%] h-[60%] bottom-[10%] right-[20%] opacity-15 delay-[-5s]"></div>
                             </div>
 
+                            {/* Top Header Section */}
+                            <header className="absolute top-0 left-0 right-0 p-6 sm:p-10 flex justify-between items-start z-50 pointer-events-none">
+                                <motion.div 
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="flex flex-col gap-0.5"
+                                >
+                                    <span className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Sirius</span>
+                                    <span className="text-[0.6rem] uppercase tracking-[0.4em] font-bold text-sirius-secondary opacity-50">Barbershop</span>
+                                </motion.div>
+
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 pointer-events-auto">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                    >
+                                        <a 
+                                            href="https://t.me/siriusxbarbershop" 
+                                            target="_blank" 
+                                            className="px-5 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sirius-secondary hover:text-white hover:border-white/20 transition-all font-medium text-sm flex items-center gap-2"
+                                        >
+                                            <span className="text-xs opacity-50 font-normal">@</span>siriusxbarbershop
+                                        </a>
+                                    </motion.div>
+
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.3 }}
+                                    >
+                                        <LanguageSwitcher />
+                                    </motion.div>
+                                </div>
+                            </header>
+
                             <motion.div
                                 initial={{ scale: 0.9, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                className="flex flex-col items-center gap-6 relative z-10 w-full"
+                                className="flex flex-col items-center gap-4 sm:gap-6 relative z-10 w-full"
                             >
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-sirius-accent/20 rounded-full flex items-center justify-center mb-2 shadow-2xl shadow-sirius-accent/20">
-                                    <UserIcon size={40} className="text-sirius-accent" />
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-sirius-accent/20 rounded-full flex items-center justify-center mb-0 shadow-2xl shadow-sirius-accent/20 relative">
+                                    <div className="absolute inset-0 bg-sirius-accent/10 blur-xl rounded-full"></div>
+                                    <UserIcon size={28} className="text-sirius-accent relative z-10 sm:size-[32px]" />
                                 </div>
-                                <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter">Вітаємо у Sirius</h2>
-                                <p className="text-sirius-secondary max-w-sm leading-relaxed text-sm sm:text-base font-medium">Увійдіть або зареєструйтесь, щоб отримати свою персональну картку лояльності.</p>
-                                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs mt-2">
-                                    <Link href="/login" className="bg-sirius-accent text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 transition-all text-center shadow-lg shadow-sirius-accent/20">
-                                        Увійти
+                                
+                                <div className="flex flex-col gap-2">
+                                    <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight leading-[0.9] text-white">
+                                        {t.welcomeTitle}
+                                    </h1>
+                                    <p className="text-sirius-secondary max-w-[280px] sm:max-w-sm mx-auto leading-relaxed text-sm sm:text-base font-medium opacity-60 px-4">
+                                        {t.welcomeSubtitle}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mt-6 px-4">
+                                    <Link href="/login" className="flex-1 bg-sirius-accent text-white px-8 py-4.5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all text-center shadow-xl shadow-sirius-accent/30 text-base">
+                                        {t.loginBtn}
                                     </Link>
-                                    <Link href="/register" className="bg-white/5 border border-white/10 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-white/10 transition-all text-center backdrop-blur-md">
-                                        Реєстрація
+                                    <Link href="/register" className="flex-1 bg-white/5 border border-white/10 text-white px-8 py-4.5 rounded-2xl font-black uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all text-center backdrop-blur-xl text-base">
+                                        {t.registerLink}
                                     </Link>
                                 </div>
                             </motion.div>
+
+                            <div className="absolute bottom-10 z-10 opacity-20 text-[0.6rem] uppercase tracking-[0.5em] font-bold text-sirius-secondary">
+                                Sirius Barbershop 2026
+                            </div>
                         </div>
                     )
                 ) : (
@@ -184,16 +234,16 @@ export default function Home() {
                             <div className="w-16 h-16 rounded-full bg-red-500/20 text-red-500 mx-auto mb-6 flex items-center justify-center">
                                 <LogoutIcon size={32} />
                             </div>
-                            <h3 className="text-xl font-black uppercase tracking-tight mb-2">Вийти з акаунту?</h3>
+                            <h3 className="text-xl font-black uppercase tracking-tight mb-2">{t.logoutConfirmTitle}</h3>
                             <p className="text-sirius-secondary text-sm mb-8 leading-relaxed">
-                                Ви впевнені, що хочете завершити поточну сесію?
+                                {t.logoutConfirmText}
                             </p>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     onClick={() => setShowLogoutConfirm(false)}
                                     className="bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all"
                                 >
-                                    Скасувати
+                                    {t.cancelBtn}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -202,7 +252,7 @@ export default function Home() {
                                     }}
                                     className="bg-red-500 hover:bg-red-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-red-500/20"
                                 >
-                                    Вийти
+                                    {t.confirmBtn}
                                 </button>
                             </div>
                         </motion.div>

@@ -8,10 +8,16 @@ export const metadata = {
     },
 };
 
+import { LanguageProvider } from '@/context/LanguageContext';
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className="antialiased">{children}</body>
+            <body className="antialiased font-sans bg-sirius-bg">
+                <LanguageProvider>
+                    {children}
+                </LanguageProvider>
+            </body>
         </html>
     );
 }

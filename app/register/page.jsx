@@ -7,7 +7,11 @@ import { ArrowLeft, User, Phone, Ticket, ShieldCheck, CheckCircle2 } from 'lucid
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+
 function RegisterContent() {
+    const { t, lang } = useLanguage();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -58,6 +62,7 @@ function RegisterContent() {
         setError('');
 
         const formData = new FormData(e.target);
+        formData.append("language", lang);
         const result = await registerClient(formData);
 
         if (result.success) {
@@ -66,14 +71,20 @@ function RegisterContent() {
                 router.push('/');
             }, 2000);
         } else {
-            setError(result.error);
+            if (result.error?.includes("вже зареєстрований")) {
+                setError(t.regError);
+            } else if (result.error?.includes("номер")) {
+                setError(t.errorInvalidPhone);
+            } else {
+                setError(result.error);
+            }
         }
         setIsLoading(false);
     };
 
     if (success) {
         return (
-            <div className="min-h-screen bg-sirius-bg flex items-center justify-center p-6 relative overflow-hidden">
+            <div className="min-h-screen bg-sirius-bg flex items-center justify-center p-6 relative overflow-hidden text-white">
                 <div className="absolute inset-0 bg-sirius-accent/5 animate-pulse"></div>
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -83,8 +94,8 @@ function RegisterContent() {
                     <div className="w-16 h-16 bg-sirius-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <CheckCircle2 className="text-sirius-accent" size={32} />
                     </div>
-                    <h2 className="text-2xl font-black uppercase mb-2">Готово!</h2>
-                    <p className="text-sirius-secondary text-sm leading-relaxed">Профіль створено. Ласкаво просимо до клубу!</p>
+                    <h2 className="text-2xl font-black uppercase mb-2">{t.successRegTitle}</h2>
+                    <p className="text-sirius-secondary text-sm leading-relaxed">{t.successRegText}</p>
                 </motion.div>
             </div>
         );
@@ -99,9 +110,7 @@ function RegisterContent() {
                     <Link href="/" className="p-2 -ml-2 text-sirius-secondary hover:text-white transition-all">
                         <ArrowLeft size={20} />
                     </Link>
-                    <div className="text-[0.6rem] font-bold tracking-[0.3em] text-sirius-accent uppercase border border-sirius-accent/30 px-3 py-1 rounded-full bg-sirius-accent/5">
-                        Loyalty Card
-                    </div>
+                    <LanguageSwitcher />
                 </header>
 
                 <motion.div
@@ -109,8 +118,12 @@ function RegisterContent() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
                 >
-                    <h1 className="text-3xl font-[900] uppercase tracking-tight leading-[0.9]">Реєстрація</h1>
-                    <p className="text-sirius-secondary text-xs mt-2 uppercase tracking-widest font-bold opacity-60">Новий клієнт Sirius</p>
+                    <h1 className="text-3xl font-[900] uppercase tracking-tight leading-[0.9]">
+                        {lang === 'ua' ? 'Реєстрація' : 'Rejestracja'}
+                    </h1>
+                    <p className="text-sirius-secondary text-xs mt-2 uppercase tracking-widest font-bold opacity-60">
+                        {lang === 'ua' ? 'Новий клієнт Sirius' : 'Nowy klient Sirius'}
+                    </p>
                 </motion.div>
 
                 <motion.form
@@ -127,7 +140,7 @@ function RegisterContent() {
                                 required
                                 name="name"
                                 type="text"
-                                placeholder="Ім'я"
+                                placeholder={t.nameLabel}
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20"
                             />
                         </div>
@@ -161,7 +174,7 @@ function RegisterContent() {
                                 inputMode="numeric"
                                 pattern="[0-9]{4}"
                                 maxLength={4}
-                                placeholder="ПІН-код (4 цифри)"
+                                placeholder={`${t.pinLabel} (${t.pinHint})`}
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20 tracking-[0.2em]"
                             />
                         </div>
@@ -174,7 +187,7 @@ function RegisterContent() {
                             type="text"
                             value={referralCode}
                             onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                            placeholder="Код реферала (якщо є)"
+                            placeholder={t.referralLabel}
                             className="w-full bg-transparent border-none py-0 px-4 text-white focus:outline-none text-sm placeholder:text-white/20 uppercase tracking-wider"
                         />
                     </div>
@@ -191,13 +204,15 @@ function RegisterContent() {
                             type="submit"
                             className="w-full bg-sirius-accent text-white py-4.5 rounded-[22px] font-black text-sm uppercase tracking-[0.15em] shadow-xl shadow-sirius-accent/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
                         >
-                            {isLoading ? 'Зачекайте...' : 'Стати Клієнтом'}
+                            {isLoading ? (lang === 'ua' ? 'Зачекайте...' : 'Czekaj...') : t.submitRegister}
                         </button>
                     </div>
 
                     <div className="text-center pt-4">
                         <p className="text-sirius-secondary text-[0.7rem] uppercase font-bold tracking-wider opacity-60">
-                            Вже у клубі? <Link href="/login" className="text-sirius-accent hover:underline ml-1">Вхід</Link>
+                            {t.backToLogin.split('?')[0]}? <Link href="/login" className="text-sirius-accent hover:underline ml-1">
+                                {t.backToLogin.split('?')[1] || (lang === 'ua' ? 'Вхід' : 'Logowanie')}
+                            </Link>
                         </p>
                     </div>
                 </motion.form>

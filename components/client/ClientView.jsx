@@ -11,7 +11,12 @@ const SiriusLogo = () => (
   </div>
 );
 
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { updateUserLanguage } from '@/lib/actions';
+
 const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout }) => {
+  const { t, lang } = useLanguage();
   const currentCycleProgress = user.visitsCount % 10;
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -21,6 +26,13 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Sync language with DB when it changes
+  useEffect(() => {
+    if (user?.id && lang) {
+      updateUserLanguage(user.id, lang);
+    }
+  }, [lang, user?.id]);
 
   const particles = useMemo(() => {
     return Array.from({ length: 20 }).map((_, i) => ({
@@ -34,9 +46,8 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
 
   return (
     <div className="relative w-full flex flex-col bg-sirius-bg text-white">
-      {/* Background Layer: Contains everything that shouldn't affect layout/scroll */}
+      {/* Background Layer */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Background Texture & Effects */}
         <div
           className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-[2] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 bg-[radial-gradient(circle,_rgba(0,71,255,0.06)_0%,_transparent_70%)]"
           style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px`, opacity: mousePos.x === 0 ? 0 : 1 }}
@@ -76,10 +87,6 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
             />
           ))}
         </div>
-
-        <div className="absolute inset-0 z-[1]">
-          <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_80%_50%,rgba(0,71,255,0.15)_0%,transparent_60%)]"></div>
-        </div>
       </div>
 
       <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-24">
@@ -91,13 +98,21 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
                 <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
                   <SiriusLogo />
                 </motion.div>
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className="px-4 py-2 rounded-[30px] text-[0.75rem] sm:text-[0.85rem] text-sirius-secondary bg-white/5 border border-white/10 w-fit backdrop-blur-md"
-                >
-                  @siriusxbarbershop
-                </motion.div>
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 pointer-events-auto">
+                  <motion.div
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                  >
+                    <a 
+                      href="https://t.me/siriusxbarbershop"
+                      target="_blank"
+                      className="px-4 py-2 rounded-[30px] text-[0.75rem] sm:text-[0.85rem] text-sirius-secondary bg-white/5 border border-white/10 w-fit backdrop-blur-md flex items-center gap-2 hover:text-white transition-all shadow-lg"
+                    >
+                      <span className="opacity-50 font-normal">@</span>siriusxbarbershop
+                    </a>
+                  </motion.div>
+                  <LanguageSwitcher />
+                </div>
               </div>
 
               <motion.div
@@ -106,7 +121,9 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
                 transition={{ delay: 0.1 }}
                 className="flex flex-col gap-1 mt-4"
               >
-                <span className="text-sirius-accent font-black text-[0.8rem] tracking-[0.2em] uppercase">Welcome Back</span>
+                <span className="text-sirius-accent font-black text-[0.8rem] tracking-[0.2em] uppercase">
+                  {lang === 'ua' ? 'З Поверненням' : 'Witaj Ponownie'}
+                </span>
                 <h1 className="text-[1.8rem] sm:text-[2.2rem] font-black leading-tight uppercase tracking-tight text-white drop-shadow-2xl">
                   {user.name}
                 </h1>
@@ -123,9 +140,9 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="loyalty-title-main !text-[2.5rem] sm:!text-[3.5rem] lg:!text-[4.5rem]"
+                className="loyalty-title-main !text-[2.5rem] sm:!text-[3.5rem]"
               >
-                LOYALTY CARD
+                {t.loyaltyCardTitle}
               </motion.h2>
             </header>
 
@@ -134,7 +151,7 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
             </main>
           </div>
 
-          {/* Right Column: Profile (Level with Welcome on PC) */}
+          {/* Right Column: Profile */}
           <div className="w-full lg:w-auto lg:mt-[10vh]">
             <ClientProfile user={user} globalSettings={globalSettings} logout={logout} />
           </div>

@@ -10,6 +10,23 @@ function hashAdminPassword(password: string) {
     return createHash("sha256").update(password + salt).digest("hex");
 }
 
+async function logAudit(action: string, targetId?: string, details?: string) {
+    try {
+        const cookieStore = await cookies();
+        const userId = cookieStore.get("currentUserId")?.value;
+        await prisma.auditLog.create({
+            data: {
+                action,
+                userId,
+                targetId,
+                details
+            }
+        });
+    } catch (error) {
+        console.error("Audit log failed:", error);
+    }
+}
+
 function validatePolishPhone(phone: string) {
     // Remove all non-digit characters
     const clean = phone.replace(/\D/g, "");
@@ -100,6 +117,7 @@ export async function registerClient(formData) {
                 referredByCode,
                 videoStage: 1,
                 visitsCount: 0,
+                language: formData.get("language") || "ua",
             },
         });
 
@@ -180,6 +198,8 @@ export async function addVisit(userId) {
             },
         });
 
+        await logAudit("ADD_VISIT", userId, `New count: ${newVisits}`);
+
         // If it's the first visit and they were referred, reward the referrer now
         if (isFirstVisit && user.referredByCode) {
             const cleanCode = user.referredByCode.trim().toUpperCase();
@@ -226,6 +246,8 @@ export async function removeVisit(userId) {
                 videoStage
             },
         });
+
+        await logAudit("REMOVE_VISIT", userId, `New count: ${newVisits}`);
 
         revalidatePath("/");
         return { success: true, user: updatedUser };
@@ -341,6 +363,7 @@ export async function updateRewardConfig(visitNumber, rewardText) {
             create: { visitNumber, rewardText }
         });
         console.log(`Successfully updated reward ${visitNumber}`);
+        await logAudit("UPDATE_REWARD", null, `Visit ${visitNumber}: ${rewardText}`);
         revalidatePath("/");
         return { success: true };
     } catch (error) {
@@ -377,6 +400,7 @@ export async function updateGlobalSettings(referralReward) {
             create: { id: "SIRIUS_CONFIG", referralReward }
         });
         console.log(`Successfully updated global settings`);
+        await logAudit("UPDATE_GLOBAL_SETTINGS", null, `Referral reward: ${referralReward}`);
         revalidatePath("/");
         return { success: true };
     } catch (error) {
@@ -399,8 +423,22 @@ export async function useReferralBonus(userId) {
             }
         });
 
+        await logAudit("SPEND_REFERRAL_BONUS", userId);
+
         revalidatePath("/");
         return { success: true, user: updatedUser };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateUserLanguage(userId: string, language: string) {
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { language }
+        });
+        return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
     }
