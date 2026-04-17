@@ -1,17 +1,56 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, useRef } from 'react';
 import { registerClient } from '@/lib/actions';
 import { motion } from 'framer-motion';
 import { ArrowLeft, User, Phone, Ticket, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function Register() {
+function RegisterContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [phone, setPhone] = useState('');
+    const [referralCode, setReferralCode] = useState('');
     const router = useRouter();
+    const searchParams = useSearchParams();
+    
+    const pinRef = useRef(null);
+    const phoneRef = useRef(null);
+
+    React.useEffect(() => {
+        const ref = searchParams.get('ref');
+        if (ref) setReferralCode(ref.toUpperCase());
+    }, [searchParams]);
+
+    const formatPhone = (value) => {
+        const digits = value.replace(/\D/g, '');
+        const clean = digits.startsWith('48') ? digits.slice(2, 11) : digits.slice(0, 9);
+        if (clean.length === 0) return { formatted: '', digits: '' };
+        let formatted = '+48 (' + clean.slice(0, 3);
+        if (clean.length > 3) {
+            formatted += ') ' + clean.slice(3, 6);
+            if (clean.length > 6) {
+                formatted += ' ' + clean.slice(6, 9);
+            }
+        }
+        return { formatted, digits: clean };
+    };
+
+    const handlePhoneChange = (e) => {
+        const { formatted, digits } = formatPhone(e.target.value);
+        setPhone(formatted);
+        if (digits.length === 9) {
+            pinRef.current?.focus();
+        }
+    };
+
+    const handlePinKeyDown = (e) => {
+        if (e.key === 'Backspace' && e.target.value === '') {
+            phoneRef.current?.focus();
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,8 +91,7 @@ export default function Register() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center justify-center p-5 overflow-x-hidden relative">
-            {/* Minimal Background Effects */}
+        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center p-5 overflow-x-hidden relative pt-[6vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/10 to-transparent pointer-events-none opacity-50"></div>
 
             <div className="max-w-[400px] w-full relative z-10 py-10">
@@ -83,7 +121,6 @@ export default function Register() {
                     className="space-y-4"
                 >
                     <div className="bg-white/[0.03] border border-white/10 rounded-[24px] p-2 space-y-px overflow-hidden">
-                        {/* Name Field */}
                         <div className="relative group flex items-center px-4 py-3 bg-transparent">
                             <User className="text-sirius-accent shrink-0" size={18} />
                             <input
@@ -97,25 +134,28 @@ export default function Register() {
 
                         <div className="h-px bg-white/5 mx-4"></div>
 
-                        {/* Phone Field */}
                         <div className="relative group flex items-center px-4 py-3 bg-transparent">
                             <Phone className="text-sirius-accent shrink-0" size={18} />
                             <input
                                 required
+                                ref={phoneRef}
                                 name="phone"
                                 type="tel"
-                                placeholder="Телефон (напр. +380...)"
+                                value={phone}
+                                onChange={handlePhoneChange}
+                                placeholder="+48 (___) ___ ___"
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20"
                             />
                         </div>
 
                         <div className="h-px bg-white/5 mx-4"></div>
 
-                        {/* PIN Field */}
                         <div className="relative group flex items-center px-4 py-3 bg-transparent">
                             <ShieldCheck className="text-sirius-accent shrink-0" size={18} />
                             <input
                                 required
+                                ref={pinRef}
+                                onKeyDown={handlePinKeyDown}
                                 name="pin"
                                 type="password"
                                 inputMode="numeric"
@@ -127,12 +167,13 @@ export default function Register() {
                         </div>
                     </div>
 
-                    {/* Referral Field (Separate for minimalism) */}
                     <div className="relative group flex items-center px-5 py-4 bg-white/[0.03] border border-white/10 rounded-[20px]">
                         <Ticket className="text-sirius-secondary shrink-0" size={16} />
                         <input
                             name="referredByCode"
                             type="text"
+                            value={referralCode}
+                            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                             placeholder="Код реферала (якщо є)"
                             className="w-full bg-transparent border-none py-0 px-4 text-white focus:outline-none text-sm placeholder:text-white/20 uppercase tracking-wider"
                         />
@@ -166,5 +207,13 @@ export default function Register() {
                 <p className="text-[0.6rem] text-sirius-secondary opacity-30 tracking-[0.4em] uppercase font-bold">Sirius Barbershop 2026</p>
             </footer>
         </div>
+    );
+}
+
+export default function Register() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-sirius-bg flex items-center justify-center text-white italic opacity-50">Завантаження...</div>}>
+            <RegisterContent />
+        </Suspense>
     );
 }

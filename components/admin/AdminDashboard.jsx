@@ -1,15 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, UserPlus, Gift, Star, Settings, Save, CheckCircle2, Users, MinusCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Search, UserPlus, Gift, Star, Settings, Save, CheckCircle2, Users, MinusCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, globalSettings, updateReferralReward, spendReferralBonus }) => {
+const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, updateReward, globalSettings, updateReferralReward, spendReferralBonus, checkAdminPasswordSet, verifyAdminPassword, setAdminPassword }) => {
   const [activeSubTab, setActiveSubTab] = useState('users'); // 'users' or 'settings'
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const adminPinRef = useRef(null);
+  const adminPhoneRef = useRef(null);
 
   const [localRewards, setLocalRewards] = useState(rewards);
   const [localReferral, setLocalReferral] = useState(globalSettings?.referralReward || "");
   const [saveStatus, setSaveStatus] = useState(null); // 'saving', 'saved', null
+  const [confirmation, setConfirmation] = useState(null); // { type, user, action }
+
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isPwdSet, setIsPwdSet] = useState(false);
+  const [pwdInput, setPwdInput] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [isCheckingPwd, setIsCheckingPwd] = useState(true);
+
+  // Check if admin password is set on mount
+  useEffect(() => {
+    const checkPwd = async () => {
+      const res = await checkAdminPasswordSet();
+      setIsPwdSet(res.isSet);
+      setIsCheckingPwd(false);
+    };
+    checkPwd();
+  }, []);
 
   // Sync local state when props change
   useEffect(() => {
@@ -41,7 +61,10 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
       formData.get('referredByCode'),
       true // isAdminRegistration
     );
-    if (user) setIsModalOpen(false);
+    if (user) {
+      setIsModalOpen(false);
+      setPhoneInput("");
+    }
   };
 
   const handleRewardChange = (index, value) => {
@@ -65,6 +88,150 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus(null), 2000);
   };
+
+  const handleActionClick = (type, user) => {
+    let action, title, description;
+
+    if (type === 'add') {
+      action = () => addVisit(user.id);
+      title = "Додати візит?";
+      description = `Додати 1 візит для ${user.name}?`;
+    } else if (type === 'remove') {
+      action = () => removeVisit(user.id);
+      title = "Видалити візит?";
+      description = `Відняти 1 візит для ${user.name}?`;
+    } else if (type === 'spend') {
+      action = () => spendReferralBonus(user.id);
+      title = "Списати бонус?";
+      description = `Використати 1 бонус друга для ${user.name}?`;
+    }
+
+    setConfirmation({ type, title, description, action });
+  };
+
+  const executeConfirmedAction = async () => {
+    if (!confirmation) return;
+    await confirmation.action();
+    setConfirmation(null);
+  };
+
+  const handleAdminAuth = async (e) => {
+    e.preventDefault();
+    setAuthError("");
+
+    if (!isPwdSet) {
+      // Setup phase
+      if (pwdInput.length < 4) {
+        setAuthError("Пароль занадто короткий");
+        return;
+      }
+      const res = await setAdminPassword(pwdInput);
+      if (res.success) {
+        setIsPwdSet(true);
+        setIsUnlocked(true);
+      }
+    } else {
+      // Verify phase
+      const res = await verifyAdminPassword(pwdInput);
+      if (res.success) {
+        setIsUnlocked(true);
+      } else {
+        setAuthError(res.error || "Невірний пароль");
+      }
+    }
+  };
+
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, '');
+    const clean = digits.startsWith('48') ? digits.slice(2, 11) : digits.slice(0, 9);
+    if (clean.length === 0) return { formatted: '', digits: '' };
+    let formatted = '+48 (' + clean.slice(0, 3);
+    if (clean.length > 3) {
+      formatted += ') ' + clean.slice(3, 6);
+      if (clean.length > 6) {
+        formatted += ' ' + clean.slice(6, 9);
+      }
+    }
+    return { formatted, digits: clean };
+  };
+
+  const handleAdminPhoneChange = (e) => {
+    const { formatted, digits } = formatPhone(e.target.value);
+    setPhoneInput(formatted);
+    if (digits.length === 9) {
+      adminPinRef.current?.focus();
+    }
+  };
+
+  const handleAdminPinKeyDown = (e) => {
+    if (e.key === 'Backspace' && e.target.value === '') {
+      adminPhoneRef.current?.focus();
+    }
+  };
+
+  if (isCheckingPwd) {
+    return (
+      <div className="flex items-center justify-center p-20">
+        <div className="w-8 h-8 border-4 border-sirius-accent border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isUnlocked) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-lg mx-auto w-full min-h-[60vh]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-sirius-card border border-white/10 rounded-[40px] p-8 sm:p-12 w-full shadow-2xl relative overflow-hidden text-center"
+        >
+          {/* Lock Background Decor */}
+          <div className="absolute top-0 right-0 p-10 opacity-5">
+            <ShieldCheck size={120} />
+          </div>
+
+          <div className="w-20 h-20 bg-sirius-accent/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-sirius-accent/10">
+            <ShieldCheck size={40} className="text-sirius-accent" />
+          </div>
+
+          <h2 className="text-2xl font-black uppercase tracking-tight mb-3">
+            {isPwdSet ? "Адмін-панель заблокована" : "Створення Адмін-пароля"}
+          </h2>
+          <p className="text-sirius-secondary text-sm mb-10 leading-relaxed font-medium">
+            {isPwdSet
+              ? "Для доступу до керування базою Sirius введіть ваш таємний пароль."
+              : "Встановіть спеціальний пароль, який буде запитуватись при вході в дашборд. Це додатковий рівень захисту."}
+          </p>
+
+          <form onSubmit={handleAdminAuth} className="space-y-6">
+            <div className="relative group">
+              <input
+                autoFocus
+                type="password"
+                placeholder={isPwdSet ? "Введіть пароль" : "Придумайте пароль"}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 focus:outline-none focus:border-sirius-accent text-center text-xl font-bold tracking-[0.2em] transition-all"
+                value={pwdInput}
+                onChange={(e) => setPwdInput(e.target.value)}
+              />
+            </div>
+
+            {authError && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-red-400 text-xs font-bold uppercase tracking-widest">
+                {authError}
+              </motion.div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-sirius-accent text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-sirius-accent/20"
+            >
+              {isPwdSet ? "Розблокувати" : "Встановити та увійти"}
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full gap-6">
@@ -185,7 +352,7 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
                               </div>
                               {user.referralBonuses > 0 && (
                                 <button
-                                  onClick={() => spendReferralBonus(user.id)}
+                                  onClick={() => handleActionClick('spend', user)}
                                   className="text-sirius-secondary hover:text-red-400 transition-colors"
                                   title="Списати 1 бонус"
                                 >
@@ -195,12 +362,23 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
                             </div>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => addVisit(user.id)}
-                              className="bg-sirius-accent hover:bg-sirius-accent/80 text-white p-3 rounded-xl transition-all active:scale-90"
-                            >
-                              <Plus size={20} />
-                            </button>
+                            <div className="flex justify-end items-center gap-2">
+                              <button
+                                onClick={() => handleActionClick('remove', user)}
+                                disabled={user.visitsCount <= 0}
+                                className="bg-white/5 hover:bg-red-500/10 text-sirius-secondary hover:text-red-400 p-3 rounded-xl transition-all active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
+                                title="Видалити візит"
+                              >
+                                <MinusCircle size={20} />
+                              </button>
+                              <button
+                                onClick={() => handleActionClick('add', user)}
+                                className="bg-sirius-accent hover:bg-sirius-accent/80 text-white p-3 rounded-xl transition-all active:scale-90"
+                                title="Додати візит"
+                              >
+                                <Plus size={20} />
+                              </button>
+                            </div>
                           </td>
                         </motion.tr>
                       );
@@ -292,9 +470,25 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
             <h2 className="text-3xl font-black uppercase mb-8 text-center">Новий клієнт</h2>
             <form onSubmit={handleRegister} className="space-y-6">
               <input required name="name" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent" placeholder="Ім'я" />
-              <input required name="phone" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent" placeholder="Телефон" />
+              <input
+                required
+                ref={adminPhoneRef}
+                name="phone"
+                value={phoneInput}
+                onChange={handleAdminPhoneChange}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent"
+                placeholder="+48 (___) ___ ___"
+              />
               <div className="grid grid-cols-2 gap-4">
-                <input required name="pin" maxLength={4} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent text-center" placeholder="PIN" />
+                <input
+                  required
+                  ref={adminPinRef}
+                  onKeyDown={handleAdminPinKeyDown}
+                  name="pin"
+                  maxLength={4}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent text-center"
+                  placeholder="PIN"
+                />
                 <input name="referredByCode" className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 focus:outline-none focus:border-sirius-accent text-center uppercase" placeholder="КОД" />
               </div>
               <button type="submit" className="w-full bg-sirius-accent text-white py-5 rounded-2xl font-black uppercase tracking-widest mt-4 shadow-xl shadow-sirius-accent/20">Зареєструвати</button>
@@ -302,6 +496,49 @@ const AdminDashboard = ({ users, addVisit, registerUser, rewards, updateReward, 
           </motion.div>
         </div>
       )}
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {confirmation && (
+          <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setConfirmation(null)}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-sirius-card border border-white/10 p-8 rounded-[32px] max-w-sm w-full relative z-10 shadow-2xl text-white text-center"
+            >
+              <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${confirmation.type === 'remove' ? 'bg-red-500/20 text-red-400' : 'bg-sirius-accent/20 text-sirius-accent'}`}>
+                {confirmation.type === 'remove' ? <MinusCircle size={32} /> : <CheckCircle2 size={32} />}
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tight mb-2">{confirmation.title}</h3>
+              <p className="text-sirius-secondary text-sm mb-8 leading-relaxed">
+                {confirmation.description}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setConfirmation(null)}
+                  className="bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all"
+                >
+                  Скасувати
+                </button>
+                <button
+                  onClick={executeConfirmedAction}
+                  className={`py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg ${confirmation.type === 'remove' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-sirius-accent hover:brightness-110 shadow-sirius-accent/20'}`}
+                >
+                  Підтвердити
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

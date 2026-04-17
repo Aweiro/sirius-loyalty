@@ -3,12 +3,80 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { createHash } from "crypto";
+
+function hashAdminPassword(password: string) {
+    const salt = process.env.ADMIN_PASSWORD_SALT || "default_salt";
+    return createHash("sha256").update(password + salt).digest("hex");
+}
+
+function validatePolishPhone(phone: string) {
+    // Remove all non-digit characters
+    const clean = phone.replace(/\D/g, "");
+    
+    // Polish numbers are 9 digits (excluding 48)
+    if (clean.length === 9) return "+48" + clean;
+    if (clean.length === 11 && clean.startsWith("48")) return "+" + clean;
+    
+    return null;
+}
+
+export async function checkAdminPasswordSet() {
+    try {
+        const settings = await prisma.globalSettings.findUnique({
+            where: { id: "SIRIUS_CONFIG" }
+        });
+        return { success: true, isSet: !!settings?.adminPasswordHash };
+    } catch (error) {
+        return { success: false, isSet: false };
+    }
+}
+
+export async function verifyAdminPassword(password: string) {
+    try {
+        const settings = await prisma.globalSettings.findUnique({
+            where: { id: "SIRIUS_CONFIG" }
+        });
+        if (!settings?.adminPasswordHash) {
+            return { success: false, error: "Пароль не встановлено" };
+        }
+
+        const inputHash = hashAdminPassword(password);
+        if (inputHash === settings.adminPasswordHash) {
+            return { success: true };
+        } else {
+            return { success: false, error: "Невірний пароль" };
+        }
+    } catch (error) {
+        return { success: false, error: "Помилка сервера" };
+    }
+}
+
+export async function setAdminPassword(password: string) {
+    try {
+        const hash = hashAdminPassword(password);
+        await prisma.globalSettings.upsert({
+            where: { id: "SIRIUS_CONFIG" },
+            update: { adminPasswordHash: hash },
+            create: { id: "SIRIUS_CONFIG", adminPasswordHash: hash }
+        });
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: "Помилка при збереженні пароля" };
+    }
+}
 
 export async function registerClient(formData) {
     const name = formData.get("name");
-    const phone = formData.get("phone");
+    const rawPhone = formData.get("phone");
     const pin = formData.get("pin");
     const referredByCode = formData.get("referredByCode");
+
+    const phone = validatePolishPhone(rawPhone);
+    if (!phone) {
+        return { success: false, error: "Невірний формат польського номера (має бути 9 цифр)" };
+    }
 
     if (!pin || pin.length !== 4) {
         return { success: false, error: "ПІН-код має складатися з 4 цифр" };
@@ -47,30 +115,33 @@ export async function registerClient(formData) {
             });
         }
 
-        // If referred by someone, increment their referralCount
+        // Referral Logic
         if (referredByCode && referredByCode.toString().trim() !== "") {
             const cleanCode = referredByCode.toString().trim().toUpperCase();
-            console.log(`Checking referrer with code: [${cleanCode}]`);
-            try {
-                const referrer = await prisma.user.update({
-                    where: { referralCode: cleanCode },
-                    data: {
-                        referralCount: { increment: 1 },
-                        referralBonuses: { increment: 1 }
-                    }
-                });
-                console.log(`REFERRAL SUCCESS: ${referrer.name} now has ${referrer.referralCount} referrals and ${referrer.referralBonuses} bonuses!`);
+            
+            // Check if referrer exists
+            const referrer = await prisma.user.findUnique({
+                where: { referralCode: cleanCode }
+            });
 
-                // ALSO give a bonus to the NEW USER who joined via referral code
+            if (referrer) {
+                // Code is VALID
+                console.log(`VALID REFERRAL CODE: [${cleanCode}] from ${referrer.name}`);
+                
+                // 1. Mark that the referral was valid (optional tracking, but we already have referredByCode in newUser)
+                // 2. Grant 1 bonus to the NEW USER immediately as a welcome gift
                 await prisma.user.update({
                     where: { id: newUser.id },
                     data: { referralBonuses: { increment: 1 } }
                 });
-                console.log(`NEW USER BONUS: Added 1 referral bonus to new user ${newUser.name}`);
-            } catch (err) {
-                console.log(`REFERRAL ERROR: Code [${cleanCode}] not found or update failed.`);
+                console.log(`NEW USER WELCOME BONUS: Added 1 referral bonus to new user ${newUser.name}`);
+            } else {
+                // Code is INVALID
+                console.log(`INVALID REFERRAL CODE: [${cleanCode}]. No bonuses granted.`);
             }
         }
+
+        revalidatePath("/");
 
         revalidatePath("/");
         revalidatePath("/register");
@@ -92,10 +163,13 @@ export async function addVisit(userId) {
         const newVisits = user.visitsCount + 1;
         let videoStage = user.videoStage;
 
-        // Progression logic
+        // Progression logic: Increase video stage every 10 visits
         if (newVisits > 0 && newVisits % 10 === 0) {
             videoStage = Math.min(videoStage + 1, 3);
         }
+
+        // Check if this is the FIRST visit
+        const isFirstVisit = user.visitsCount === 0;
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
@@ -103,6 +177,53 @@ export async function addVisit(userId) {
                 visitsCount: newVisits,
                 videoStage,
                 lastVisitAt: new Date(),
+            },
+        });
+
+        // If it's the first visit and they were referred, reward the referrer now
+        if (isFirstVisit && user.referredByCode) {
+            const cleanCode = user.referredByCode.trim().toUpperCase();
+            try {
+                const referrer = await prisma.user.update({
+                    where: { referralCode: cleanCode },
+                    data: {
+                        referralCount: { increment: 1 },
+                        referralBonuses: { increment: 1 }
+                    }
+                });
+                console.log(`REFERRAL REWARDED: ${referrer.name} received a bonus for ${user.name}'s first visit!`);
+            } catch (err) {
+                console.log(`REFERRAL REWARD FAILED: Referrer code [${cleanCode}] not found or update failed.`);
+            }
+        }
+
+        revalidatePath("/");
+        return { success: true, user: updatedUser };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function removeVisit(userId) {
+    try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) throw new Error("User not found");
+        if (user.visitsCount <= 0) throw new Error("No visits to remove");
+
+        const newVisits = user.visitsCount - 1;
+        let videoStage = user.videoStage;
+
+        // Regression logic: Decrease video stage if falling below a 10-visit threshold
+        // e.g., if was 10 (stage 2) and becomes 9, go back to stage 1
+        if (newVisits >= 0 && (newVisits + 1) % 10 === 0 && newVisits > 0) {
+            videoStage = Math.max(videoStage - 1, 1);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                visitsCount: newVisits,
+                videoStage
             },
         });
 
@@ -125,11 +246,32 @@ export async function getUsers() {
 }
 
 export async function loginClient(formData) {
-    const phone = formData.get("phone");
+    const rawPhone = formData.get("phone");
     const pin = formData.get("pin");
 
+    const phone = validatePolishPhone(rawPhone);
+    if (!phone) {
+        return { success: false, error: "Невірний номер телефону" };
+    }
+
     try {
-        const user = await prisma.user.findUnique({ where: { phone } });
+        // Try finding by full international format first
+        let user = await prisma.user.findUnique({ where: { phone } });
+        
+        // Fallback for transition period: search by 9-digit version if not found
+        if (!user && phone.startsWith("+48")) {
+            const shortPhone = phone.slice(3);
+            user = await prisma.user.findUnique({ where: { phone: shortPhone } });
+            
+            // Auto-update to new format on successful login
+            if (user && user.pin === pin) {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { phone: phone }
+                });
+            }
+        }
+
         if (!user || user.pin !== pin) {
             return { success: false, error: "Невірний номер телефону або ПІН-код" };
         }

@@ -11,8 +11,7 @@ const SiriusLogo = () => (
   </div>
 );
 
-const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebration, logout }) => {
-  const videoUrl = getVideoUrl(user.videoStage);
+const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout }) => {
   const currentCycleProgress = user.visitsCount % 10;
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -79,18 +78,6 @@ const ClientView = ({ user, rewards, globalSettings, getVideoUrl, closeCelebrati
         </div>
 
         <div className="absolute inset-0 z-[1]">
-          <AnimatePresence mode="wait">
-            <motion.video
-              key={videoUrl}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.15 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              autoPlay muted loop playsInline
-              className="w-full h-full object-cover"
-              src={videoUrl}
-            />
-          </AnimatePresence>
           <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_80%_50%,rgba(0,71,255,0.15)_0%,transparent_60%)]"></div>
         </div>
       </div>

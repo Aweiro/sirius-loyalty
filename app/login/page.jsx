@@ -11,7 +11,43 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [phone, setPhone] = useState('');
     const router = useRouter();
+    const pinRef = React.useRef(null);
+    const phoneRef = React.useRef(null);
+
+    const formatPhone = (value) => {
+        const digits = value.replace(/\D/g, '');
+        const clean = digits.startsWith('48') ? digits.slice(2, 11) : digits.slice(0, 9);
+        
+        if (clean.length === 0) return '';
+        
+        let formatted = '+48 (' + clean.slice(0, 3);
+        if (clean.length > 3) {
+            formatted += ') ' + clean.slice(3, 6);
+            if (clean.length > 6) {
+                formatted += ' ' + clean.slice(6, 9);
+            }
+        }
+        return { formatted, digits: clean };
+    };
+
+    const handlePhoneChange = (e) => {
+        const val = e.target.value;
+        const { formatted, digits } = formatPhone(val);
+        setPhone(formatted);
+        
+        // Auto-focus logic: if 9 digits are entered, move to PIN
+        if (digits.length === 9) {
+            pinRef.current?.focus();
+        }
+    };
+
+    const handlePinKeyDown = (e) => {
+        if (e.key === 'Backspace' && e.target.value === '') {
+            phoneRef.current?.focus();
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,7 +87,7 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center justify-center p-6 overflow-x-hidden relative">
+        <div className="min-h-screen bg-sirius-bg text-white font-sans flex flex-col items-center p-6 overflow-x-hidden relative pt-[8vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/5 to-transparent pointer-events-none"></div>
 
             <div className="max-w-[380px] w-full relative z-10 py-10">
@@ -82,9 +118,12 @@ export default function Login() {
                             <Phone className="text-sirius-accent shrink-0" size={20} />
                             <input
                                 required
+                                ref={phoneRef}
                                 name="phone"
                                 type="tel"
-                                placeholder="Номер телефону"
+                                value={phone}
+                                onChange={handlePhoneChange}
+                                placeholder="+48 (___) ___ ___"
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20"
                             />
                         </div>
@@ -95,6 +134,8 @@ export default function Login() {
                             <ShieldCheck className="text-sirius-accent shrink-0" size={20} />
                             <input
                                 required
+                                ref={pinRef}
+                                onKeyDown={handlePinKeyDown}
                                 name="pin"
                                 type="password"
                                 inputMode="numeric"

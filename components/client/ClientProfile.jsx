@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Users, Share2, Check, Copy, Gift, Star, LogOut } from 'lucide-react';
+import { Award, Users, Share2, Check, Copy, Gift, Star, LogOut, Info } from 'lucide-react';
 
 const ClientProfile = ({ user, globalSettings, logout }) => {
     const [copied, setCopied] = useState(false);
     const referralCode = user.referralCode || 'SIRIUS123';
     const completedCycles = user.completedCycles || 0;
     const referralCount = user.referralCount || 0;
-    const referralReward = globalSettings?.referralReward || "Безкоштовна стрижка";
+    const referralReward = globalSettings?.referralReward || "0";
+
+    // Extract number and currency from string (e.g., "20 PLN" -> 20 and "PLN")
+    const match = referralReward.match(/\d+/);
+    const rewardValue = match ? parseInt(match[0]) : null;
+    const currency = rewardValue !== null ? referralReward.replace(/\d+/g, '').trim() : "Бонусів";
+    const totalBalance = rewardValue !== null ? (user.referralBonuses || 0) * rewardValue : (user.referralBonuses || 0);
+
+    const [showInfo, setShowInfo] = useState(false);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(referralCode);
+        const inviteLink = `${window.location.origin}/register?ref=${referralCode}`;
+        const inviteText = `Запрошую тебе в Sirius Barbershop! ✂️\n\nЗареєструйся за моїм посиланням і ми ОБОЄ отримаємо "${referralReward}" на наступний візит! 🎁\n\nТвоє посилання: ${inviteLink}\n\nСтавай частиною клубу! 💈`;
+
+        navigator.clipboard.writeText(inviteText);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -22,16 +33,45 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-sirius-accent/20 border border-sirius-accent/30 p-5 rounded-[24px] backdrop-blur-md shadow-lg shadow-sirius-accent/10"
+                    className="bg-sirius-accent/20 border border-sirius-accent/30 p-5 rounded-[24px] backdrop-blur-md shadow-lg shadow-sirius-accent/10 relative"
                 >
-                    <div className="flex items-center gap-3 mb-3 text-sirius-accent">
-                        <Gift size={20} />
-                        <span className="text-[0.7rem] font-black uppercase tracking-[0.2em]">Ваш Баланс</span>
+                    <div className="flex items-center justify-between mb-3 text-sirius-accent">
+                        <div className="flex items-center gap-3">
+                            <Gift size={20} />
+                            <span className="text-[0.7rem] font-black uppercase tracking-[0.2em]">Ваш Баланс</span>
+                        </div>
+                        <div className="relative">
+                            <button
+                                onMouseEnter={() => setShowInfo(true)}
+                                onMouseLeave={() => setShowInfo(false)}
+                                onClick={() => setShowInfo(!showInfo)}
+                                className="focus:outline-none"
+                            >
+                                <Info size={14} className={`transition-opacity ${showInfo ? 'opacity-100' : 'opacity-40'}`} />
+                            </button>
+                            <AnimatePresence>
+                                {showInfo && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                                        className="absolute bottom-full left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-0 mb-2 w-64 lg:w-96 max-w-[calc(100vw-60px)] sm:max-w-xs lg:max-w-none p-4 bg-sirius-card/95 border border-white/10 rounded-2xl text-[0.65rem] text-white leading-relaxed shadow-2xl z-[100] backdrop-blur-xl"
+                                    >
+                                        <p className="mb-2">Бонуси будуть нараховані та доступні для використання при наступному візиті. 💈</p>
+                                        <div className="h-px bg-white/5 my-2"></div>
+                                        <p className="opacity-80">Бонуси за запрошених друзів ви отримаєте після того, як ваш друг здійснюнить свій перший візит у барбершоп.</p>
+                                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 lg:left-auto lg:right-2 lg:translate-x-0 w-2 h-2 bg-sirius-card border-r border-b border-white/10 rotate-45"></div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="text-4xl font-black text-white leading-none">{user.referralBonuses || 0}</div>
+                    <div className="flex items-baseline gap-2">
+                        <div className="text-4xl font-black text-white leading-none">
+                            {totalBalance}
+                        </div>
                         <div className="flex flex-col">
-                            <span className="text-sirius-accent font-black text-[0.8rem] uppercase leading-tight">{referralReward}</span>
+                            <span className="text-sirius-accent font-black text-[0.8rem] uppercase leading-tight">{currency}</span>
                         </div>
                     </div>
                 </motion.div>
@@ -46,7 +86,14 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                         <Users size={18} />
                         <span className="text-[0.7rem] font-bold uppercase tracking-wider">Реферали</span>
                     </div>
-                    <div className="text-3xl font-black">{referralCount}</div>
+                    <div className="flex items-center justify-between items-end">
+                        <div className="text-3xl font-black">{referralCount}</div>
+                        {user.referredByCode && (
+                            <div className="text-[0.6rem] text-sirius-accent font-bold uppercase tracking-wider mb-1">
+                                Запросив: {user.referredByCode}
+                            </div>
+                        )}
+                    </div>
                     <p className="text-[0.65rem] text-sirius-secondary mt-1 uppercase font-bold">Друзів прийшло</p>
                 </motion.div>
 

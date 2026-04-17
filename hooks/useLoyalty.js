@@ -9,14 +9,13 @@ import {
     updateRewardConfig as serverUpdateReward,
     getGlobalSettings as serverGetSettings,
     updateGlobalSettings as serverUpdateSettings,
-    useReferralBonus as serverUseBonus
+    useReferralBonus as serverUseBonus,
+    removeVisit as serverRemoveVisit,
+    checkAdminPasswordSet as serverCheckAdminSet,
+    verifyAdminPassword as serverVerifyAdmin,
+    setAdminPassword as serverSetAdmin
 } from '@/lib/actions';
 
-const VIDEO_STAGES = [
-    { stage: 1, url: "/video1.mp4" },
-    { stage: 2, url: "/video2.mp4" },
-    { stage: 3, url: "/video3.mp4" }
-];
 
 export const useLoyalty = () => {
     const [users, setUsers] = useState([]);
@@ -62,6 +61,18 @@ export const useLoyalty = () => {
 
     const addVisit = async (userId) => {
         const result = await serverAddVisit(userId);
+        if (result.success) {
+            setUsers(prev => prev.map(u => u.id === userId ? result.user : u));
+            if (currentUser && currentUser.id === userId) {
+                setCurrentUser(result.user);
+            }
+            return result.user;
+        }
+        return null;
+    };
+
+    const removeVisit = async (userId) => {
+        const result = await serverRemoveVisit(userId);
         if (result.success) {
             setUsers(prev => prev.map(u => u.id === userId ? result.user : u));
             if (currentUser && currentUser.id === userId) {
@@ -131,10 +142,18 @@ export const useLoyalty = () => {
         return false;
     };
 
-    const getVideoUrl = (stage) => {
-        const video = VIDEO_STAGES.find(v => v.stage === (stage || 1));
-        return video ? video.url : VIDEO_STAGES[0].url;
+    const checkAdminPasswordSet = async () => {
+        return await serverCheckAdminSet();
     };
+
+    const verifyAdminPassword = async (pwd) => {
+        return await serverVerifyAdmin(pwd);
+    };
+
+    const setAdminPassword = async (pwd) => {
+        return await serverSetAdmin(pwd);
+    };
+
 
     return {
         users,
@@ -150,7 +169,10 @@ export const useLoyalty = () => {
         updateReward,
         updateReferralReward,
         spendReferralBonus,
-        getVideoUrl
+        removeVisit,
+        checkAdminPasswordSet,
+        verifyAdminPassword,
+        setAdminPassword
     };
 };
 
