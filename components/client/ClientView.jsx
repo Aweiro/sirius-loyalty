@@ -89,7 +89,7 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
         </div>
       </div>
 
-      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-24">
+      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-12">
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
           {/* Left Column: Heading + Card */}
           <div className="flex-1 w-full flex flex-col gap-[4vh] sm:gap-[6vh]">
@@ -103,7 +103,7 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                   >
-                    <a 
+                    <a
                       href="https://t.me/siriusxbarbershop"
                       target="_blank"
                       className="px-4 py-2 rounded-[30px] text-[0.75rem] sm:text-[0.85rem] text-sirius-secondary bg-white/5 border border-white/10 w-fit backdrop-blur-md flex items-center gap-2 hover:text-white transition-all shadow-lg"

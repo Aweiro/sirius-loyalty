@@ -20,7 +20,10 @@ export default function Login() {
     const phoneRef = React.useRef(null);
 
     React.useEffect(() => {
-        phoneRef.current?.focus();
+        const timer = setTimeout(() => {
+            phoneRef.current?.focus();
+        }, 100);
+        return () => clearTimeout(timer);
     }, []);
 
     const formatPhone = (value) => {
@@ -144,6 +147,7 @@ export default function Login() {
                                 ref={phoneRef}
                                 name="phone"
                                 type="tel"
+                                autoFocus
                                 value={phone}
                                 onChange={handlePhoneChange}
                                 placeholder="+48 (___) ___ ___"

@@ -28,7 +28,10 @@ function RegisterContent() {
         const ref = searchParams.get('ref');
         if (ref) setReferralCode(ref.toUpperCase());
         
-        nameRef.current?.focus();
+        const timer = setTimeout(() => {
+            nameRef.current?.focus();
+        }, 100);
+        return () => clearTimeout(timer);
     }, [searchParams]);
 
     const formatPhone = (value) => {
@@ -144,6 +147,7 @@ function RegisterContent() {
                                 name="name"
                                 type="text"
                                 ref={nameRef}
+                                autoFocus
                                 placeholder={t.nameLabel}
                                 className="w-full bg-transparent border-none py-1 px-4 text-white focus:outline-none text-base placeholder:text-white/20"
                             />
