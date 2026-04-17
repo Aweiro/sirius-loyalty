@@ -5,7 +5,7 @@ import { translateReward } from '@/lib/translations';
 
 const LoyaltyCard = ({ progress, rewards }) => {
   const { lang } = useLanguage();
-  
+
   return (
     <div className="grid grid-cols-5 gap-[clamp(8px,2vw,45px)] w-full max-w-[950px] overflow-visible">
       {rewards.map((reward, index) => {

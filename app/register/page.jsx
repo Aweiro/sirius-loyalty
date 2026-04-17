@@ -9,9 +9,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import useLoyalty from '@/hooks/useLoyalty';
 
 function RegisterContent() {
     const { t, lang } = useLanguage();
+    const { currentUser, loading: loyaltyLoading } = useLoyalty();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -19,6 +21,12 @@ function RegisterContent() {
     const [referralCode, setReferralCode] = useState('');
     const router = useRouter();
     const searchParams = useSearchParams();
+    
+    React.useEffect(() => {
+        if (currentUser && !loyaltyLoading) {
+            router.push('/');
+        }
+    }, [currentUser, loyaltyLoading, router]);
     
     const pinRef = useRef(null);
     const phoneRef = useRef(null);
@@ -107,8 +115,10 @@ function RegisterContent() {
         );
     }
 
+    if (loyaltyLoading) return null;
+
     return (
-        <div className="h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-5 overflow-hidden relative pt-[2vh] sm:justify-center">
+        <div className="h-[100dvh] max-h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-5 overflow-hidden overscroll-y-none relative pt-[2vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/10 to-transparent pointer-events-none opacity-50"></div>
 
             <div className="max-w-[400px] w-full relative z-10 py-10">

@@ -8,9 +8,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import useLoyalty from '@/hooks/useLoyalty';
 
 export default function Login() {
     const { t, lang } = useLanguage();
+    const { currentUser, loading: loyaltyLoading } = useLoyalty();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
@@ -18,6 +20,12 @@ export default function Login() {
     const router = useRouter();
     const pinRef = React.useRef(null);
     const phoneRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (currentUser && !loyaltyLoading) {
+            router.push('/');
+        }
+    }, [currentUser, loyaltyLoading, router]);
 
     React.useEffect(() => {
         const timer = setTimeout(() => {
@@ -107,8 +115,10 @@ export default function Login() {
         );
     }
 
+    if (loyaltyLoading) return null;
+
     return (
-        <div className="h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-6 overflow-hidden relative pt-[4vh] sm:justify-center">
+        <div className="h-[100dvh] max-h-[100dvh] bg-sirius-bg text-white font-sans flex flex-col items-center p-6 overflow-hidden overscroll-y-none relative pt-[4vh] sm:justify-center">
             <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-sirius-accent/5 to-transparent pointer-events-none"></div>
 
             <div className="max-w-[380px] w-full relative z-10 py-10">
