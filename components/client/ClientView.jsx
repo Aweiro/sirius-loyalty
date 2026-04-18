@@ -104,7 +104,7 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
         </div>
       </div>
 
-      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-12">
+      <div className="relative z-20 w-full max-w-[1250px] mx-auto px-6 sm:px-10 pt-[4vh] pb-32 lg:pb-12">
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
           {/* Left Column: Heading + Card */}
           <div className="flex-1 w-full flex flex-col gap-[4vh] sm:gap-[6vh]">

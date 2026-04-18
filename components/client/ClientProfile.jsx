@@ -75,15 +75,17 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                     className="flex flex-col gap-3"
                 >
                     {globalSettings?.booksyLink && (
-                        <a
-                            href={globalSettings.booksyLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full flex items-center justify-center gap-3 bg-white text-black py-4 rounded-xl font-black text-sm transition-all hover:bg-sirius-accent hover:text-white active:scale-95 shadow-xl group shadow-sirius-accent/5 px-2 text-center"
-                        >
-                            <Calendar size={18} className="group-hover:scale-110 transition-transform shrink-0" />
-                            {t.bookNow}
-                        </a>
+                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-sirius-bg/80 backdrop-blur-xl border-t border-white/5 z-[100] lg:relative lg:p-0 lg:bg-transparent lg:border-none lg:z-auto lg:backdrop-blur-none">
+                            <a
+                                href={globalSettings.booksyLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full flex items-center justify-center gap-3 bg-white text-black py-4 rounded-xl font-black text-sm transition-all hover:bg-sirius-accent hover:text-white active:scale-95 shadow-xl group shadow-sirius-accent/5 px-2 text-center"
+                            >
+                                <Calendar size={18} className="group-hover:scale-110 transition-transform shrink-0" />
+                                {t.bookNow}
+                            </a>
+                        </div>
                     )}
 
                     {globalSettings?.addressText && (
@@ -191,9 +193,12 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                                 onMouseEnter={() => setShowInfo(true)}
                                 onMouseLeave={() => setShowInfo(false)}
                                 onClick={() => setShowInfo(!showInfo)}
-                                className="focus:outline-none"
+                                className={`focus:outline-none p-2 -mr-2 transition-all active:scale-125 flex items-center justify-center rounded-full ${showInfo ? 'bg-sirius-accent/30 shadow-lg shadow-sirius-accent/20' : 'bg-sirius-accent/10 sm:bg-transparent'}`}
                             >
-                                <Info size={14} className={`transition-opacity ${showInfo ? 'opacity-100' : 'opacity-40'}`} />
+                                <Info 
+                                    size={20} 
+                                    className={`transition-all ${showInfo ? 'text-white scale-110 opacity-100' : 'text-sirius-accent opacity-100 sm:opacity-60 hover:opacity-100'}`} 
+                                />
                             </button>
                             <AnimatePresence>
                                 {showInfo && (
@@ -201,12 +206,13 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                                         initial={{ opacity: 0, scale: 0.9, y: 5 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                        className="absolute bottom-full right-0 mb-2 w-64 p-4 bg-sirius-card/95 border border-white/10 rounded-2xl text-[0.65rem] text-white leading-relaxed shadow-2xl z-[100] backdrop-blur-xl"
+                                        className="fixed inset-x-5 bottom-30 sm:absolute sm:bottom-full sm:right-0 sm:inset-x-auto mb-2 w-64 sm:w-80 p-5 bg-sirius-card/95 border border-white/10 rounded-[24px] text-[0.7rem] sm:text-[0.8rem] text-white leading-relaxed shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[110] backdrop-blur-xl"
                                     >
-                                        <p className="mb-2">{t.infoVisits}</p>
-                                        <div className="h-px bg-white/5 my-2"></div>
-                                        <p className="opacity-80">{t.infoReferral}</p>
-                                        <div className="absolute -bottom-1 right-2 w-2 h-2 bg-sirius-card border-r border-b border-white/10 rotate-45"></div>
+                                        <p className="mb-2 font-black text-xs text-sirius-accent uppercase tracking-tight">{lang === 'ua' ? 'Інформація' : 'Informacja'}</p>
+                                        <p className="mb-3 font-bold">{t.infoVisits}</p>
+                                        <div className="h-px bg-white/5 my-3"></div>
+                                        <p className="opacity-70 italic leading-relaxed">{t.infoReferral}</p>
+                                        <div className="hidden sm:block absolute -bottom-1 right-3 w-3 h-3 bg-sirius-card border-r border-b border-white/10 rotate-45"></div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -227,7 +233,7 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                                 className="mt-2 flex items-center gap-1.5 text-white/40 font-bold"
                             >
                                 <span className="text-[0.6rem] uppercase tracking-wider">
-                                    +{rewardValue !== null ? user.pendingReferralsCount * rewardValue : user.pendingReferralsCount} {currency}
+                                    {rewardValue !== null ? user.pendingReferralsCount * rewardValue : user.pendingReferralsCount} {currency} {t.pendingLabel}
                                 </span>
                             </motion.div>
                         )}
