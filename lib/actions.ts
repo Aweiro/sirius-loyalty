@@ -324,7 +324,20 @@ export async function getCurrentUser() {
         const userId = cookieStore.get("currentUserId")?.value;
         if (!userId) return null;
 
-        return await prisma.user.findUnique({ where: { id: userId } });
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return null;
+
+        const pendingReferralsCount = await prisma.user.count({
+            where: {
+                referredByCode: user.referralCode,
+                visitsCount: 0
+            }
+        });
+
+        return {
+            ...user,
+            pendingReferralsCount
+        };
     } catch (error) {
         return null;
     }
@@ -391,16 +404,21 @@ export async function getGlobalSettings() {
     }
 }
 
-export async function updateGlobalSettings(referralReward) {
+export async function updateGlobalSettings(settings: { 
+    referralReward?: string, 
+    booksyLink?: string, 
+    addressText?: string, 
+    googleMapsLink?: string 
+}) {
     try {
-        console.log(`Updating global settings (referral reward) to: "${referralReward}"`);
+        console.log(`Updating global settings:`, settings);
         await prisma.globalSettings.upsert({
             where: { id: "SIRIUS_CONFIG" },
-            update: { referralReward },
-            create: { id: "SIRIUS_CONFIG", referralReward }
+            update: settings,
+            create: { id: "SIRIUS_CONFIG", ...settings }
         });
         console.log(`Successfully updated global settings`);
-        await logAudit("UPDATE_GLOBAL_SETTINGS", null, `Referral reward: ${referralReward}`);
+        await logAudit("UPDATE_GLOBAL_SETTINGS", null, JSON.stringify(settings));
         revalidatePath("/");
         return { success: true };
     } catch (error) {

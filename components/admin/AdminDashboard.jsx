@@ -12,6 +12,9 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
 
   const [localRewards, setLocalRewards] = useState(rewards);
   const [localReferral, setLocalReferral] = useState(globalSettings?.referralReward || "");
+  const [localBooksy, setLocalBooksy] = useState(globalSettings?.booksyLink || "");
+  const [localAddress, setLocalAddress] = useState(globalSettings?.addressText || "");
+  const [localMaps, setLocalMaps] = useState(globalSettings?.googleMapsLink || "");
   const [saveStatus, setSaveStatus] = useState(null); // 'saving', 'saved', null
   const [confirmation, setConfirmation] = useState(null); // { type, user, action }
 
@@ -26,6 +29,13 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
     const checkPwd = async () => {
       const res = await checkAdminPasswordSet();
       setIsPwdSet(res.isSet);
+      
+      // Check for persistent unlock
+      const savedAuth = localStorage.getItem('sirius_admin_unlocked');
+      if (savedAuth === 'true') {
+        setIsUnlocked(true);
+      }
+      
       setIsCheckingPwd(false);
     };
     checkPwd();
@@ -38,6 +48,9 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
 
   useEffect(() => {
     if (globalSettings?.referralReward) setLocalReferral(globalSettings.referralReward);
+    if (globalSettings?.booksyLink) setLocalBooksy(globalSettings.booksyLink);
+    if (globalSettings?.addressText) setLocalAddress(globalSettings.addressText);
+    if (globalSettings?.googleMapsLink) setLocalMaps(globalSettings.googleMapsLink);
   }, [globalSettings]);
 
   const filteredUsers = users.filter(u =>
@@ -81,10 +94,10 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
     setTimeout(() => setSaveStatus(null), 2000);
   };
 
-  const commitReferralUpdate = async () => {
-    if (localReferral === globalSettings.referralReward) return;
+  const commitGlobalUpdate = async (field, value) => {
+    if (value === globalSettings[field]) return;
     setSaveStatus('saving');
-    await updateReferralReward(localReferral);
+    await updateReferralReward({ [field]: value }); // Note: actions.ts is being updated to take an object
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus(null), 2000);
   };
@@ -135,6 +148,7 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
       const res = await verifyAdminPassword(pwdInput);
       if (res.success) {
         setIsUnlocked(true);
+        localStorage.setItem('sirius_admin_unlocked', 'true');
       } else {
         setAuthError(res.error || "Невірний пароль");
       }
@@ -449,11 +463,56 @@ const AdminDashboard = ({ users, addVisit, removeVisit, registerUser, rewards, u
                         name="referralReward"
                         value={localReferral}
                         onChange={(e) => setLocalReferral(e.target.value)}
-                        onBlur={commitReferralUpdate}
+                        onBlur={() => commitGlobalUpdate('referralReward', localReferral)}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-sirius-accent font-black text-sm transition-all shadow-inner"
                         placeholder="Наприклад: Безкоштовна стрижка"
                       />
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Booksy & Address Card */}
+              <div className="bg-sirius-card border border-white/5 p-6 sm:p-8 rounded-[24px] mt-6">
+                <h4 className="text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-3">
+                  <Settings size={20} className="text-sirius-accent" />
+                  Контакти та Запис
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-sirius-secondary mb-2">Посилання на Booksy</div>
+                      <input
+                        value={localBooksy}
+                        onChange={(e) => setLocalBooksy(e.target.value)}
+                        onBlur={() => commitGlobalUpdate('booksyLink', localBooksy)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-sirius-accent text-sm"
+                        placeholder="https://booksy.com/..."
+                      />
+                    </div>
+                    <div>
+                      <div className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-sirius-secondary mb-2">Посилання на Google Maps</div>
+                      <input
+                        value={localMaps}
+                        onChange={(e) => setLocalMaps(e.target.value)}
+                        onBlur={() => commitGlobalUpdate('googleMapsLink', localMaps)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-sirius-accent text-sm"
+                        placeholder="https://goo.gl/maps/..."
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-sirius-secondary mb-2">Адреса салону</div>
+                    <textarea
+                      value={localAddress}
+                      onChange={(e) => setLocalAddress(e.target.value)}
+                      onBlur={() => commitGlobalUpdate('addressText', localAddress)}
+                      rows={5}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-sirius-accent text-sm resize-none"
+                      placeholder="Вулиця, номер будинку, місто..."
+                    />
                   </div>
                 </div>
               </div>

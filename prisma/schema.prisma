@@ -39,6 +39,9 @@ model VisitReward {
 model GlobalSettings {
   id                String   @id @default("SIRIUS_CONFIG")
   referralReward    String   @default("Безкоштовна стрижка") // Reward for both
+  booksyLink        String?
+  addressText       String?
+  googleMapsLink    String?
   adminPasswordHash String?  // Encrypted password for sensitive admin actions
   updatedAt         DateTime @updatedAt
 }

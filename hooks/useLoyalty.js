@@ -124,10 +124,13 @@ export const useLoyalty = () => {
         }
     };
 
-    const updateReferralReward = async (value) => {
-        const result = await serverUpdateSettings(value);
+    const updateReferralReward = async (settings) => {
+        // Handle both single value (legacy) and settings object
+        const settingsObj = typeof settings === 'string' ? { referralReward: settings } : settings;
+        
+        const result = await serverUpdateSettings(settingsObj);
         if (result.success) {
-            setGlobalSettings(prev => ({ ...prev, referralReward: value }));
+            setGlobalSettings(prev => ({ ...prev, ...settingsObj }));
         }
     };
 

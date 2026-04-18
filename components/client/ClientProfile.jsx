@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Award, Users, Share2, Check, Copy, Gift, Star, LogOut, Info } from 'lucide-react';
+import { Award, Users, Share2, Check, Copy, Gift, Star, LogOut, Info, MapPin, Calendar, Navigation } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -64,6 +64,53 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
 
     return (
         <div className="flex flex-col gap-6 w-full lg:w-80 text-white">
+            {/* Booking & Address Section */}
+            {(globalSettings?.booksyLink || globalSettings?.addressText) && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.25 }}
+                    className="flex flex-col gap-3"
+                >
+                    {globalSettings?.booksyLink && (
+                        <a
+                            href={globalSettings.booksyLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-3 bg-white text-black py-4 rounded-xl font-black text-sm transition-all hover:bg-sirius-accent hover:text-white active:scale-95 shadow-xl group shadow-sirius-accent/5 px-2 text-center"
+                        >
+                            <Calendar size={18} className="group-hover:scale-110 transition-transform shrink-0" />
+                            {t.bookNow}
+                        </a>
+                    )}
+
+                    {globalSettings?.addressText && (
+                        <div className="bg-white/5 border border-white/10 p-5 rounded-[24px] backdrop-blur-md relative overflow-hidden group">
+                            <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-full bg-sirius-accent/10 flex items-center justify-center shrink-0">
+                                    <MapPin className="text-sirius-accent" size={20} />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[0.65rem] font-black uppercase tracking-widest text-sirius-secondary mb-1">{t.salonAddress}</span>
+                                    <p className="text-xs font-bold leading-relaxed mb-2 pr-2 line-clamp-2">{globalSettings.addressText}</p>
+
+                                    {globalSettings?.googleMapsLink && (
+                                        <a
+                                            href={globalSettings.googleMapsLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[0.6rem] font-black uppercase tracking-widest text-sirius-accent flex items-center gap-1 hover:underline w-fit"
+                                        >
+                                            <Navigation size={10} />
+                                            {t.viewOnMap}
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            )}
 
             {/* Invite Section */}
             <motion.div
@@ -97,14 +144,14 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                 </p>
 
                 <div className="relative">
-                    <div 
+                    <div
                         onClick={copyCodeOnly}
                         className="bg-black/40 border border-sirius-accent/30 rounded-2xl py-5 px-4 text-center font-black text-sirius-accent tracking-[0.2em] text-2xl mb-4 shadow-inner transform transition-all hover:scale-[1.02] active:scale-95 cursor-pointer relative group/code"
                     >
                         {referralCode}
                         <AnimatePresence>
                             {codeCopied && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
@@ -124,6 +171,8 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                     </button>
                 </div>
             </motion.div>
+
+
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
@@ -163,13 +212,27 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                             </AnimatePresence>
                         </div>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                        <div className="text-4xl font-black text-white leading-none">
-                            {totalBalance}
+                    <div className="flex flex-col">
+                        <div className="flex items-baseline gap-2">
+                            <div className="text-4xl font-black text-white leading-none">
+                                {totalBalance}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sirius-accent font-black text-[0.8rem] uppercase leading-tight">{currency}</span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-sirius-accent font-black text-[0.8rem] uppercase leading-tight">{currency}</span>
-                        </div>
+
+                        {(user.pendingReferralsCount || 0) > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="mt-2 flex items-center gap-1.5 text-white/40 font-bold"
+                            >
+                                <span className="text-[0.65rem] uppercase tracking-wider">
+                                    +{rewardValue !== null ? user.pendingReferralsCount * rewardValue : user.pendingReferralsCount} {currency} {t.pendingBalance}
+                                </span>
+                            </motion.div>
+                        )}
                     </div>
                 </motion.div>
 
