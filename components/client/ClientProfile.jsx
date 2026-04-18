@@ -62,6 +62,8 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
         setTimeout(() => setCodeCopied(false), 2000);
     };
 
+    const totalEarnedAmount = rewardValue !== null ? referralCount * rewardValue : referralCount;
+
     return (
         <div className="flex flex-col gap-6 w-full lg:w-80 text-white">
             {/* Booking & Address Section */}
@@ -112,7 +114,7 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                 </motion.div>
             )}
 
-            {/* Invite Section */}
+            {/* Invite Section (Blue Style) */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -172,8 +174,6 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                 </div>
             </motion.div>
 
-
-
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                 <motion.div
@@ -201,12 +201,12 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                                         initial={{ opacity: 0, scale: 0.9, y: 5 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                                        className="absolute bottom-full left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-0 mb-2 w-64 lg:w-96 max-w-[calc(100vw-60px)] sm:max-w-xs lg:max-w-none p-4 bg-sirius-card/95 border border-white/10 rounded-2xl text-[0.65rem] text-white leading-relaxed shadow-2xl z-[100] backdrop-blur-xl"
+                                        className="absolute bottom-full right-0 mb-2 w-64 p-4 bg-sirius-card/95 border border-white/10 rounded-2xl text-[0.65rem] text-white leading-relaxed shadow-2xl z-[100] backdrop-blur-xl"
                                     >
                                         <p className="mb-2">{t.infoVisits}</p>
                                         <div className="h-px bg-white/5 my-2"></div>
                                         <p className="opacity-80">{t.infoReferral}</p>
-                                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 lg:left-auto lg:right-2 lg:translate-x-0 w-2 h-2 bg-sirius-card border-r border-b border-white/10 rotate-45"></div>
+                                        <div className="absolute -bottom-1 right-2 w-2 h-2 bg-sirius-card border-r border-b border-white/10 rotate-45"></div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -214,12 +214,10 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                     </div>
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
-                            <div className="text-4xl font-black text-white leading-none">
+                            <div className="text-3xl font-black text-white leading-none">
                                 {totalBalance}
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-sirius-accent font-black text-[0.8rem] uppercase leading-tight">{currency}</span>
-                            </div>
+                            <span className="text-sirius-accent font-black text-[0.7rem] uppercase">{currency}</span>
                         </div>
 
                         {(user.pendingReferralsCount || 0) > 0 && (
@@ -228,8 +226,8 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="mt-2 flex items-center gap-1.5 text-white/40 font-bold"
                             >
-                                <span className="text-[0.65rem] uppercase tracking-wider">
-                                    +{rewardValue !== null ? user.pendingReferralsCount * rewardValue : user.pendingReferralsCount} {currency} {t.pendingBalance}
+                                <span className="text-[0.6rem] uppercase tracking-wider">
+                                    +{rewardValue !== null ? user.pendingReferralsCount * rewardValue : user.pendingReferralsCount} {currency}
                                 </span>
                             </motion.div>
                         )}
@@ -246,28 +244,28 @@ const ClientProfile = ({ user, globalSettings, logout }) => {
                         <Users size={18} />
                         <span className="text-[0.7rem] font-bold uppercase tracking-wider">{t.referralsLabel}</span>
                     </div>
-                    <div className="flex items-center justify-between items-end">
-                        <div className="text-3xl font-black">{referralCount}</div>
+                    <div className="flex flex-col">
+                        <div className="text-3xl font-black text-white">{referralCount} <span className="text-sirius-secondary text-sm">{t.friendsSuffix}</span></div>
+                        <p className="text-[0.65rem] text-sirius-accent font-bold uppercase tracking-wider mt-1">
+                            {t.youEarned} {totalEarnedAmount} {currency}
+                        </p>
                     </div>
-                    {user.referredByCode && (
-                        <div className="text-[0.6rem] text-sirius-accent font-bold uppercase tracking-wider mb-1">
-                            {t.invitedBy}: {user.referredByCode}
-                        </div>
-                    )}
                 </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="bg-white/[0.03] border border-white/5 p-5 rounded-[24px] backdrop-blur-md"
+                    className="bg-white/[0.03] border border-white/5 p-5 rounded-[24px] backdrop-blur-md flex flex-col justify-between"
                 >
                     <div className="flex items-center gap-3 mb-3 text-sirius-accent/60">
                         <Star size={18} />
                         <span className="text-[0.7rem] font-bold uppercase tracking-wider text-sirius-secondary">{t.totalVisits}</span>
                     </div>
-                    <div className="text-3xl font-black text-white">{completedCycles * 10 + user.visitsCount}</div>
-                    <p className="text-[0.65rem] text-sirius-secondary mt-1 uppercase font-bold opacity-50">{t.lifetimeVisits}</p>
+                    <div>
+                        <div className="text-3xl font-black text-white">{completedCycles * 10 + user.visitsCount}</div>
+                        <p className="text-[0.55rem] text-sirius-secondary mt-1 uppercase font-bold opacity-30">{t.lifetimeVisits}</p>
+                    </div>
                 </motion.div>
             </div>
 

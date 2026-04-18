@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import LoyaltyCard from './LoyaltyCard';
 import ClientProfile from './ClientProfile';
+import LoyaltyProgress from './LoyaltyProgress';
 import CelebrationOverlay from '@/components/CelebrationOverlay';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,6 +19,20 @@ import { updateUserLanguage } from '@/lib/actions';
 const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout }) => {
   const { t, lang } = useLanguage();
   const currentCycleProgress = user.visitsCount % 10;
+
+  // Logic to find the nearest next reward
+  const nextRewardData = useMemo(() => {
+    // Search from next visit index up to the end of the 10-visit cycle
+    for (let i = currentCycleProgress; i < 10; i++) {
+      if (rewards[i] && rewards[i].trim() !== "") {
+        return {
+          reward: rewards[i],
+          visitsRemaining: (i + 1) - currentCycleProgress
+        };
+      }
+    }
+    return null;
+  }, [currentCycleProgress, rewards]);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -147,6 +162,11 @@ const ClientView = ({ user, rewards, globalSettings, closeCelebration, logout })
             </header>
 
             <main className="w-full overflow-visible">
+              <LoyaltyProgress
+                progress={currentCycleProgress}
+                nextReward={nextRewardData?.reward}
+                visitsRemaining={nextRewardData?.visitsRemaining}
+              />
               <LoyaltyCard progress={currentCycleProgress} rewards={rewards} />
             </main>
           </div>
